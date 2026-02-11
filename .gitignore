@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+*.db
+*.sqlite
+.DS_Store
+Thumbs.db
+.vscode/
+.claude/
+.security-check/
+maas.db-shm
+maas.db-wal
