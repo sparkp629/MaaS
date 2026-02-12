@@ -357,20 +357,20 @@ function seedDatabase(db) {
   // ----- KOL TOP CONTENT (aperçus à fort engagement) -----
   try {
     const topCount = db.prepare('SELECT COUNT(*) as c FROM kol_top_content').get().c;
-    if (topCount > 0) { /* déjà seedé */ } else {
-    const insertTop = db.prepare(`
-      INSERT INTO kol_top_content (kol_id, platform, content_preview, content_url, thumbnail_url, engagement_rate, impressions, format_type)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    const topContent = [
-      [1, 'twitter', '🧵 Thread: 5 façons dont CodeFlow AI transforme le workflow dev... 1/ Le problème: 60% du temps dev est du boilerplate 2/ CodeFlow analyse votre codebase et génère le contexte 3/ Intégration native', 'https://x.com/marcdev_ai/status/1', null, 8.2, 12500, 'thread'],
-      [8, 'youtube', null, 'https://youtube.com/watch?v=demo', 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', 4.5, 22000, 'long'],
-      [8, 'youtube', null, 'https://youtube.com/shorts/demo', 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', 6.8, 45000, 'short'],
-      [2, 'linkedin', 'Découvrez comment l\'IA transforme le développement. Mon dernier projet a réduit le boilerplate de 80%. Lien dans les commentaires.', 'https://linkedin.com/feed/update/1', null, 3.1, 4200, 'post'],
-    ];
-    for (const t of topContent) {
-      insertTop.run(...t);
-    }
+    if (topCount === 0) {
+      const insertTop = db.prepare(`
+        INSERT INTO kol_top_content (kol_id, platform, content_preview, content_url, thumbnail_url, engagement_rate, impressions, format_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const topContent = [
+        [1, 'twitter', '🧵 Thread: 5 façons dont CodeFlow AI transforme le workflow dev... 1/ Le problème: 60% du temps dev est du boilerplate 2/ CodeFlow analyse votre codebase et génère le contexte 3/ Intégration native', 'https://x.com/marcdev_ai/status/1', null, 8.2, 12500, 'thread'],
+        [8, 'youtube', null, 'https://youtube.com/watch?v=demo', 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', 4.5, 22000, 'long'],
+        [8, 'youtube', null, 'https://youtube.com/shorts/demo', 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', 6.8, 45000, 'short'],
+        [2, 'linkedin', 'Découvrez comment l\'IA transforme le développement. Mon dernier projet a réduit le boilerplate de 80%. Lien dans les commentaires.', 'https://linkedin.com/feed/update/1', null, 3.1, 4200, 'post'],
+      ];
+      for (const t of topContent) {
+        insertTop.run(...t);
+      }
     }
   } catch (_) { /* table peut exister sans seed */ }
 
