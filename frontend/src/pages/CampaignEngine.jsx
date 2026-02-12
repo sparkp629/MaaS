@@ -196,7 +196,7 @@ export default function CampaignEngine() {
                     {c.kol_name[0]}
                   </div>
                   <div>
-                    <p className="font-medium text-white">{c.kol_name}</p>
+                    <p className="text-sm font-semibold text-white">{c.kol_name}</p>
                     <p className="text-xs text-slate-500">{c.kol_handle} · Ton: {c.tone}</p>
                   </div>
                 </div>
@@ -269,7 +269,7 @@ export default function CampaignEngine() {
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
-                      <p className="font-medium text-white">{c.product_name}</p>
+                      <p className="text-sm font-semibold text-white">{c.product_name}</p>
                       <p className="text-xs text-slate-500">@{c.client_name?.replace(/\s/g, '') || 'client'} · {c.niche}</p>
                     </div>
                     <span className="text-xs font-semibold text-indigo-400 shrink-0">{score}/100</span>

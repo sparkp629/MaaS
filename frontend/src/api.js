@@ -42,8 +42,5 @@ export const api = {
   getArchitecture: () => fetchJSON('/architecture'),
   getStripeConfig: () => fetchJSON('/stripe/config'),
   createPaymentIntent: (amount) => postJSON('/stripe/create-payment-intent', { amount }),
-  analyzeGithub: (repo) => postJSON('/analysis/github', repo),
-  getAnalysisLatest: () => fetchJSON('/analysis/latest'),
-  getTopContent: (platform) => fetchJSON(`/top-content${platform ? `?platform=${platform}` : ''}`),
-  getKolsByEngagement: () => fetchJSON('/kols/by-engagement'),
+  getTopEngagedContent: () => fetchJSON('/content/top-engaged'),
 };

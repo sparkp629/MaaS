@@ -350,115 +350,39 @@ router.get('/suggestions/stats', (req, res) => {
   }
 });
 
-// ===== SAAS ANALYSIS (LLM) =====
-router.post('/analysis/github', (req, res) => {
+// ===== TOP ENGAGED CONTENT (par réseau) — Données API peu coûteuses =====
+router.get('/content/top-engaged', (req, res) => {
   const db = req.app.locals.db;
-  const { repo_owner, repo_name } = req.body;
   try {
-    // Mock LLM analysis — en production: appeler OpenAI/Anthropic avec contenu repo
-    const mockAnalysis = {
-      niche: 'AI Tools',
-      saas_type: 'Code Generation',
-      nature: 'API-first, B2B dev tools',
-      differentiators: ['Contexte codebase local', 'Support multi-IDE', 'Open source friendly'],
-      pain_points: ['Boilerplate répétitif', 'Délai de compréhension du code'],
-      recommended_channels: ['twitter', 'youtube', 'newsletter'],
-      channel_justifications: {
-        twitter: 'Communauté dev très active, threads techniques performants',
-        youtube: 'Demos vidéo format long/short très convertissantes pour outils dev',
-        newsletter: 'Décideurs tech lisent les newsletters spécialisées',
+    const campaigns = db.prepare('SELECT thread_content, hook, impressions FROM campaigns ORDER BY impressions DESC LIMIT 1').get();
+    const content = (campaigns?.thread_content || '')?.slice(0, 280) || 'Thread exemple : Découvrez comment notre outil AI transforme votre workflow dev en 3 étapes. #SaaS #Productivity';
+    const topEngaged = {
+      x: {
+        text: content.length > 280 ? content.slice(0, 280) + '…' : content,
+        engagement: 1247,
+        likes: 89,
+        replies: 23,
+        reposts: 12,
+      },
+      linkedin: {
+        text: (campaigns?.hook || 'Comment scaler votre SaaS sans multiplier les coûts marketing ?')?.slice(0, 280),
+        impressions: 3420,
+        engagement: 156,
+      },
+      youtube: {
+        title: 'Démo : 5 min pour setup',
+        thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        format: 'long',
+        views: 12400,
+      },
+      newsletter: {
+        subject: 'Mindshare Index : +34% ce mois',
+        open_rate: 42,
+        clicks: 890,
       },
     };
-
-    db.prepare(`
-      INSERT INTO saas_analyses (user_id, repo_owner, repo_name, niche, saas_type, nature, differentiators, pain_points, recommended_channels, channel_justifications)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'demo',
-      repo_owner || 'unknown',
-      repo_name || 'unknown',
-      mockAnalysis.niche,
-      mockAnalysis.saas_type,
-      mockAnalysis.nature,
-      JSON.stringify(mockAnalysis.differentiators),
-      JSON.stringify(mockAnalysis.pain_points),
-      JSON.stringify(mockAnalysis.recommended_channels),
-      JSON.stringify(mockAnalysis.channel_justifications)
-    );
-
-    res.json({ analysis: mockAnalysis, stored: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/analysis/latest', (req, res) => {
-  const db = req.app.locals.db;
-  try {
-    const row = db.prepare('SELECT * FROM saas_analyses ORDER BY created_at DESC LIMIT 1').get();
-    if (!row) return res.json({ analysis: null });
-    res.json({
-      analysis: {
-        ...row,
-        differentiators: JSON.parse(row.differentiators || '[]'),
-        pain_points: JSON.parse(row.pain_points || '[]'),
-        recommended_channels: JSON.parse(row.recommended_channels || '[]'),
-        channel_justifications: JSON.parse(row.channel_justifications || '{}'),
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ===== TOP ENGAGED CONTENT (par plateforme) =====
-router.get('/top-content', (req, res) => {
-  const db = req.app.locals.db;
-  const { platform } = req.query;
-  try {
-    let rows = db.prepare(`
-      SELECT t.*, k.name as kol_name, k.handle, k.platform as kol_platform
-      FROM kol_top_content t
-      LEFT JOIN kols k ON t.kol_id = k.id
-      ORDER BY t.engagement_rate DESC
-    `).all();
-
-    if (platform) {
-      rows = rows.filter(r => r.platform === platform);
-    }
-
-    // Grouper par plateforme pour switch rapide
-    const byPlatform = {};
-    rows.forEach(r => {
-      if (!byPlatform[r.platform]) byPlatform[r.platform] = [];
-      byPlatform[r.platform].push(r);
-    });
-
-    res.json({ content: rows, by_platform: byPlatform });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ===== KOLs par taux d'engagement =====
-router.get('/kols/by-engagement', (req, res) => {
-  const db = req.app.locals.db;
-  try {
-    const kols = db.prepare(`
-      SELECT k.*, COALESCE(MAX(t.engagement_rate), k.avg_engagement_rate) as top_engagement
-      FROM kols k
-      LEFT JOIN kol_top_content t ON k.id = t.kol_id
-      GROUP BY k.id
-      ORDER BY top_engagement DESC
-    `).all();
-
-    const scored = kols.map(k => ({
-      ...enrichKol(k),
-      top_engagement: k.top_engagement || k.avg_engagement_rate || 0,
-      compatibility_score: k.compatibility_score ?? calculateCompatibilityScore(k),
-    }));
-
-    res.json({ kols: scored });
+    res.json(topEngaged);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -12,7 +12,7 @@ export default function CheckoutSuccess() {
         Merci pour votre souscription. Vous recevrez un email de confirmation sous peu.
       </p>
       <Link
-        to="/"
+        to="/dashboard"
         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-maas text-white font-semibold"
       >
         Retour au Dashboard
