@@ -1,0 +1,24 @@
+---
+description: Relancer le projet MaaS en local à chaque modification significative
+alwaysApply: true
+---
+
+# Règle : Relancer MaaS en local
+
+À chaque modification de fichiers (backend, frontend, routes, pages, composants) :
+
+1. **Après chaque modification** : lancer le projet en local pour que l'utilisateur puisse voir les changements.
+
+2. **Commandes** :
+   - Backend : `cd backend && npm run dev`
+   - Frontend : `cd frontend && npm run dev`
+
+3. **En arrière-plan** : exécuter les deux en tant que processus background si non déjà en cours.
+
+4. **Vérifier** : si des terminaux exécutent déjà ces commandes, ne pas relancer. Sinon, démarrer les serveurs.
+
+5. **Après changement backend** : le `--watch` relance automatiquement le serveur Node ; redémarrer manuellement si le watch ne suffit pas.
+
+6. **Après changement frontend** : Vite hot-reload — pas de relance nécessaire sauf si config modifiée.
+
+Objectif : l'utilisateur doit pouvoir visualiser l'aperçu du MaaS après chaque intervention.

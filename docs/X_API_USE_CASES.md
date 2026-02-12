@@ -2,9 +2,13 @@
 
 **Document destiné à la soumission auprès de X (Twitter) pour la protection des données**
 
+Conformément à l'[X Developer Agreement](https://docs.x.com/developer-terms/agreement) et à la [Developer Policy](https://docs.x.com/developer-terms/policy). Service commercial — tier Pro ou Enterprise.
+
 ## 1. Description du service MaaS
 
 Mindshare-as-a-Service (MaaS) est une plateforme d'agence de marketing d'influence spécialisée dans l'écosystème SaaS et Micro-SaaS. Nous aidons les fondateurs de logiciels à accroître leur visibilité ("mindshare") auprès des développeurs et early adopters via des campagnes de contenu distribuées par des Key Opinion Leaders (KOLs) sur X, YouTube et Twitch.
+
+**Clarification "Pay to engage"** : MaaS rémunère les KOLs pour la création et la distribution de contenu original (prestation), pas pour des actions d'engagement (likes, reposts, follows). Aucun achat ni vente d'engagement artificiel.
 
 ## 2. Cas d'utilisation des données X
 

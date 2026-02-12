@@ -96,6 +96,8 @@ function initDB() {
       date TEXT NOT NULL,
       twitter_impressions INTEGER DEFAULT 0,
       twitter_engagement REAL DEFAULT 0,
+      linkedin_impressions INTEGER DEFAULT 0,
+      linkedin_engagement REAL DEFAULT 0,
       newsletter_opens INTEGER DEFAULT 0,
       newsletter_ctr REAL DEFAULT 0,
       youtube_views INTEGER DEFAULT 0,
@@ -113,7 +115,47 @@ function initDB() {
       category TEXT DEFAULT 'general',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS saas_analyses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      repo_owner TEXT,
+      repo_name TEXT,
+      niche TEXT,
+      saas_type TEXT,
+      nature TEXT,
+      differentiators TEXT,
+      pain_points TEXT,
+      recommended_channels TEXT,
+      channel_justifications TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS kol_top_content (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kol_id INTEGER,
+      platform TEXT NOT NULL,
+      content_preview TEXT,
+      content_url TEXT,
+      thumbnail_url TEXT,
+      engagement_rate REAL,
+      impressions INTEGER,
+      format_type TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (kol_id) REFERENCES kols(id)
+    );
   `);
+
+  // Migration: colonnes LinkedIn (si table existante sans ces colonnes)
+  try {
+    const cols = db.prepare("PRAGMA table_info(mindshare_metrics)").all().map(c => c.name);
+    if (!cols.includes('linkedin_impressions')) {
+      db.exec('ALTER TABLE mindshare_metrics ADD COLUMN linkedin_impressions INTEGER DEFAULT 0');
+    }
+    if (!cols.includes('linkedin_engagement')) {
+      db.exec('ALTER TABLE mindshare_metrics ADD COLUMN linkedin_engagement REAL DEFAULT 0');
+    }
+  } catch (_) { /* table inexistante, CREATE TABLE ci-dessus la créera avec les colonnes */ }
 
   // ===== SEED DATA =====
   const kolCount = db.prepare('SELECT COUNT(*) as c FROM kols').get().c;
@@ -239,8 +281,9 @@ function seedDatabase(db) {
   // ----- MINDSHARE METRICS (30 jours de données) -----
   const insertMetric = db.prepare(`
     INSERT INTO mindshare_metrics (campaign_id, date, twitter_impressions, twitter_engagement,
+      linkedin_impressions, linkedin_engagement,
       newsletter_opens, newsletter_ctr, youtube_views, twitch_viewers, brand_mentions, sentiment, mindshare_index)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const metricsTx = db.transaction(() => {
@@ -254,6 +297,8 @@ function seedDatabase(db) {
       insertMetric.run(1, dateStr,
         Math.round(3000 + progress * 12000 + Math.random() * 2000),
         3.2 + progress * 4.8 + Math.random() * 1.5,
+        Math.round(400 + progress * 3500 + Math.random() * 600),
+        1.2 + progress * 3.5 + Math.random() * 0.8,
         Math.round(800 + progress * 2200 + Math.random() * 400),
         12.5 + progress * 15 + Math.random() * 3,
         Math.round(500 + progress * 3500 + Math.random() * 800),
@@ -267,6 +312,8 @@ function seedDatabase(db) {
       insertMetric.run(2, dateStr,
         Math.round(2000 + progress * 8000 + Math.random() * 1500),
         2.8 + progress * 4.2 + Math.random() * 1.2,
+        Math.round(300 + progress * 2200 + Math.random() * 400),
+        0.8 + progress * 2.8 + Math.random() * 0.6,
         Math.round(600 + progress * 1800 + Math.random() * 300),
         10.2 + progress * 12 + Math.random() * 2.5,
         Math.round(300 + progress * 2500 + Math.random() * 600),
@@ -306,6 +353,26 @@ function seedDatabase(db) {
     }
   });
   insertAuditTx();
+
+  // ----- KOL TOP CONTENT (aperçus à fort engagement) -----
+  try {
+    const topCount = db.prepare('SELECT COUNT(*) as c FROM kol_top_content').get().c;
+    if (topCount > 0) { /* déjà seedé */ } else {
+    const insertTop = db.prepare(`
+      INSERT INTO kol_top_content (kol_id, platform, content_preview, content_url, thumbnail_url, engagement_rate, impressions, format_type)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const topContent = [
+      [1, 'twitter', '🧵 Thread: 5 façons dont CodeFlow AI transforme le workflow dev... 1/ Le problème: 60% du temps dev est du boilerplate 2/ CodeFlow analyse votre codebase et génère le contexte 3/ Intégration native', 'https://x.com/marcdev_ai/status/1', null, 8.2, 12500, 'thread'],
+      [8, 'youtube', null, 'https://youtube.com/watch?v=demo', 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', 4.5, 22000, 'long'],
+      [8, 'youtube', null, 'https://youtube.com/shorts/demo', 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', 6.8, 45000, 'short'],
+      [2, 'linkedin', 'Découvrez comment l\'IA transforme le développement. Mon dernier projet a réduit le boilerplate de 80%. Lien dans les commentaires.', 'https://linkedin.com/feed/update/1', null, 3.1, 4200, 'post'],
+    ];
+    for (const t of topContent) {
+      insertTop.run(...t);
+    }
+    }
+  } catch (_) { /* table peut exister sans seed */ }
 
   console.log('[MaaS] Base de données initialisée avec les données de démo');
 }

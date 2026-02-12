@@ -10,3 +10,4 @@ Thumbs.db
 .security-check/
 maas.db-shm
 maas.db-wal
+logs/

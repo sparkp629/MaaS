@@ -40,4 +40,10 @@ export const api = {
   submitSuggestion: (content, category) => postJSON('/suggestions', { content, category }),
   getSuggestionStats: () => fetchJSON('/suggestions/stats'),
   getArchitecture: () => fetchJSON('/architecture'),
+  getStripeConfig: () => fetchJSON('/stripe/config'),
+  createPaymentIntent: (amount) => postJSON('/stripe/create-payment-intent', { amount }),
+  analyzeGithub: (repo) => postJSON('/analysis/github', repo),
+  getAnalysisLatest: () => fetchJSON('/analysis/latest'),
+  getTopContent: (platform) => fetchJSON(`/top-content${platform ? `?platform=${platform}` : ''}`),
+  getKolsByEngagement: () => fetchJSON('/kols/by-engagement'),
 };

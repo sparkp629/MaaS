@@ -79,52 +79,184 @@ function analyzeNichePotential(db, niche) {
 }
 
 /**
- * Génère l'offre irrésistible MaaS basée sur l'analyse des concurrents
+ * Comparaisons MaaS vs Services traditionnels par niche
+ * Chiffrées, intuitives: qualité, praticité, économie, gain de temps
+ */
+const NICHE_COMPARISONS = {
+  'AI Tools': {
+    traditional_cost_annual: 48000,
+    traditional_hours_annual: 420,
+    traditional_quality_score: 65,
+    traditional_setup_days: 45,
+    maas_savings_pct: 72,
+    maas_time_saved_hours: 380,
+    maas_quality_score: 92,
+    maas_setup_days: 3,
+    pain_points: ['Agences peu familières avec la tech AI', 'Délai de compréhension produit 4-6 semaines', 'Pitch générique = faible conversion'],
+    maas_advantages: ['Match KOL-IA natif: compréhension immédiate du repo', 'Contenus différenciants en 48h', 'Attribution revenue par KOL'],
+  },
+  'Code Generation': {
+    traditional_cost_annual: 52000,
+    traditional_hours_annual: 380,
+    traditional_quality_score: 60,
+    traditional_setup_days: 60,
+    maas_savings_pct: 75,
+    maas_time_saved_hours: 340,
+    maas_quality_score: 88,
+    maas_setup_days: 2,
+    pain_points: ['Développeurs méfiants des agences marketing', 'Produits complexes à vulgariser', 'Faux positifs dans le ciblage'],
+    maas_advantages: ['Analyse GitHub → langage technique adapté', 'KOLs dev/tech authentiques', 'Zero bullshit positioning'],
+  },
+  'Productivity': {
+    traditional_cost_annual: 36000,
+    traditional_hours_annual: 280,
+    traditional_quality_score: 70,
+    traditional_setup_days: 30,
+    maas_savings_pct: 68,
+    maas_time_saved_hours: 240,
+    maas_quality_score: 90,
+    maas_setup_days: 4,
+    pain_points: ['Niche saturée, CPM élevé', 'Message noyé dans le bruit', 'Difficile de prouver l\'impact'],
+    maas_advantages: ['Micro-KOLs à forte affinité audience', 'Mindshare Index = preuve chiffrée', 'ROI mesuré au centime près'],
+  },
+  'NoCode': {
+    traditional_cost_annual: 42000,
+    traditional_hours_annual: 350,
+    traditional_quality_score: 62,
+    traditional_setup_days: 40,
+    maas_savings_pct: 70,
+    maas_time_saved_hours: 300,
+    maas_quality_score: 85,
+    maas_setup_days: 5,
+    pain_points: ['Communauté fragmentée (Bubble, Webflow, etc.)', 'Influenceurs souvent affiliés concurrents', 'Démos longues à produire'],
+    maas_advantages: ['Cartographie de la niche NoCode', 'Match créateurs non affiliés', 'Demos courtes générées automatiquement'],
+  },
+  'DevOps': {
+    traditional_cost_annual: 58000,
+    traditional_hours_annual: 450,
+    traditional_quality_score: 58,
+    traditional_setup_days: 70,
+    maas_savings_pct: 78,
+    maas_time_saved_hours: 400,
+    maas_quality_score: 91,
+    maas_setup_days: 3,
+    pain_points: ['Aucune agence spécialisée DevOps B2B', 'Décideurs tech difficiles à toucher', 'Cycle de vente long'],
+    maas_advantages: ['KOLs SRE/DevOps avec audience CTO', 'Positionnement technique crédible', 'Pipeline warm leads qualifiés'],
+  },
+  'SEO': {
+    traditional_cost_annual: 44000,
+    traditional_hours_annual: 320,
+    traditional_quality_score: 68,
+    traditional_setup_days: 35,
+    maas_savings_pct: 65,
+    maas_time_saved_hours: 260,
+    maas_quality_score: 87,
+    maas_setup_days: 5,
+    pain_points: ['SEO = canal lent, peu de "quick wins"', 'Influenceurs SEO souvent payés au CPV', 'Trafique non qualifié'],
+    maas_advantages: ['Mindshare comme levier SEO indirect', 'Autorité par citations KOL', 'Trafic intentionnel qualifié'],
+  },
+  'Analytics': {
+    traditional_cost_annual: 46000,
+    traditional_hours_annual: 340,
+    traditional_quality_score: 64,
+    traditional_setup_days: 42,
+    maas_savings_pct: 71,
+    maas_time_saved_hours: 280,
+    maas_quality_score: 89,
+    maas_setup_days: 4,
+    pain_points: ['Produits data difficiles à "puncher"', 'Décideurs data très rationnels', 'Peu d\'influenceurs spécialisés'],
+    maas_advantages: ['KOLs data engineers, analystes', 'Case studies chiffrés générés', 'Positionnement proof-driven'],
+  },
+  default: {
+    traditional_cost_annual: 45000,
+    traditional_hours_annual: 360,
+    traditional_quality_score: 64,
+    traditional_setup_days: 45,
+    maas_savings_pct: 70,
+    maas_time_saved_hours: 300,
+    maas_quality_score: 88,
+    maas_setup_days: 5,
+    pain_points: ['Coût agence récurrent élevé', 'Perte de temps en briefings', 'Résultats difficiles à mesurer'],
+    maas_advantages: ['Paiement unique, résultat garanti', 'Setup rapide via GitHub', 'Dashboard ROI temps réel'],
+  },
+};
+
+/**
+ * Génère l'offre irrésistible MaaS — achat unique high-ticket (10 000€+)
  */
 function generateIrresistibleOffer(db) {
   const weaknesses = getCompetitorWeaknesses(db);
 
   return {
     title: 'L\'Offre Irrésistible MaaS',
-    subtitle: 'La première agence de Mindshare basée sur la performance pour l\'écosystème SaaS',
+    subtitle: 'Achat unique high-ticket — La première agence de Mindshare basée sur la performance pour l\'écosystème SaaS',
+    pricing_model: {
+      type: 'one_time',
+      description: 'Paiement unique — zéro abonnement, résultat garanti',
+      tiers: [
+        {
+          name: 'Foundation',
+          price: 10000,
+          price_display: '10 000€',
+          one_time: true,
+          includes: [
+            'Audit de niche complet & cartographie KOL',
+            '5 Micro-KOLs matchés (score compatibilité >85)',
+            '20 contenus différenciants générés',
+            'Dashboard Mindshare Index 6 mois',
+            'Rapport ROI détaillé à 90 jours',
+          ],
+          best_for: 'Early-stage SaaS (MRR < 15k€)',
+        },
+        {
+          name: 'Growth',
+          price: 25000,
+          price_display: '25 000€',
+          one_time: true,
+          featured: true,
+          includes: [
+            'Tout Foundation +',
+            '12 KOLs matchés (micro + mid-tier)',
+            '50 contenus multi-format (threads, vidéos courtes, newsletter)',
+            'Content Orchestrator automatisé',
+            'Attribution multi-touch par canal',
+            'A/B testing hooks & CTA',
+            'Accès Mindshare Index 12 mois',
+          ],
+          best_for: 'SaaS en croissance (MRR 15k€–80k€)',
+        },
+        {
+          name: 'Scale',
+          price: 50000,
+          price_display: '50 000€+',
+          one_time: true,
+          includes: [
+            'Tout Growth +',
+            '25+ KOLs multi-plateforme (X, LinkedIn, YouTube, Twitch)',
+            'Contenus illimités sur la durée de la campagne',
+            'Campagnes vidéo (YouTube, Twitch) incluses',
+            'Account manager dédié',
+            'Stratégie mindshare trimestrielle',
+            'Garantie ROI positif ou complément offert',
+          ],
+          best_for: 'SaaS établi (MRR 80k€+)',
+        },
+      ],
+    },
+    niche_comparisons: NICHE_COMPARISONS,
     problems_solved: weaknesses.map(w => ({
       problem: w.weakness,
       solution: w.maas_solution,
       severity: w.severity,
     })),
-    pricing_model: {
-      name: 'Performance-First',
-      description: 'Vous ne payez que pour les résultats mesurables',
-      tiers: [
-        {
-          name: 'Starter',
-          price: '997€/mois + 5% du revenue influenced',
-          includes: ['Audit de niche complet', '3 Micro-KOLs matchés', '12 contenus/mois', 'Dashboard Mindshare Index', 'Rapport hebdomadaire'],
-          best_for: 'Early-stage SaaS (<$10k MRR)',
-        },
-        {
-          name: 'Growth',
-          price: '2,497€/mois + 3% du revenue influenced',
-          includes: ['Tout Starter +', '8 KOLs matchés (micro + mid)', '30 contenus/mois', 'Content Orchestrator automatisé', 'Attribution multi-touch', 'A/B testing de hooks'],
-          best_for: 'SaaS en croissance ($10k-$50k MRR)',
-          featured: true,
-        },
-        {
-          name: 'Scale',
-          price: '4,997€/mois + 2% du revenue influenced',
-          includes: ['Tout Growth +', '20+ KOLs multi-plateforme', 'Contenus illimités', 'Campagnes YouTube + Twitch', 'Account manager dédié', 'Stratégie mindshare trimestrielle'],
-          best_for: 'SaaS établi ($50k+ MRR)',
-        },
-      ],
-    },
     guarantees: [
-      'ROI positif garanti sous 90 jours ou remboursement intégral',
-      'Transparence totale: accès dashboard temps réel',
-      'Aucun engagement long-terme: résiliable mensuellement',
+      'ROI positif garanti sous 90 jours ou complément offert jusqu\'à résultat',
+      'Paiement unique — aucun abonnement, zéro surprise',
+      'Transparence totale: accès dashboard temps réel dès le jour 1',
     ],
     urgency: {
-      message: 'Places limitées: nous n\'acceptons que 5 nouveaux clients par mois pour garantir la qualité',
-      social_proof: '23 SaaS accompagnés | +340% Mindshare Index moyen | $2.4M revenue influenced',
+      message: 'Places limitées: 5 nouveaux clients par trimestre pour garantir la qualité',
+      social_proof: '23 SaaS accompagnés | +340% Mindshare Index moyen | 2.4M€ revenue influenced',
     },
   };
 }

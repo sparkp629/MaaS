@@ -1,6 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
+const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
 
 const { getMarketAudit, getSegments, getCompetitorWeaknesses, analyzeNichePotential, generateIrresistibleOffer, calculateEstimatedROI } = require('../services/marketAnalysis');
 const { scoreAllKOLs, detectMicroKOLs, getScoreBreakdown, calculateCompatibilityScore, WEIGHTS } = require('../services/kolScoring');
@@ -346,6 +347,147 @@ router.get('/suggestions/stats', (req, res) => {
     res.json({ total, by_category: byCategory, recent });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== SAAS ANALYSIS (LLM) =====
+router.post('/analysis/github', (req, res) => {
+  const db = req.app.locals.db;
+  const { repo_owner, repo_name } = req.body;
+  try {
+    // Mock LLM analysis — en production: appeler OpenAI/Anthropic avec contenu repo
+    const mockAnalysis = {
+      niche: 'AI Tools',
+      saas_type: 'Code Generation',
+      nature: 'API-first, B2B dev tools',
+      differentiators: ['Contexte codebase local', 'Support multi-IDE', 'Open source friendly'],
+      pain_points: ['Boilerplate répétitif', 'Délai de compréhension du code'],
+      recommended_channels: ['twitter', 'youtube', 'newsletter'],
+      channel_justifications: {
+        twitter: 'Communauté dev très active, threads techniques performants',
+        youtube: 'Demos vidéo format long/short très convertissantes pour outils dev',
+        newsletter: 'Décideurs tech lisent les newsletters spécialisées',
+      },
+    };
+
+    db.prepare(`
+      INSERT INTO saas_analyses (user_id, repo_owner, repo_name, niche, saas_type, nature, differentiators, pain_points, recommended_channels, channel_justifications)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'demo',
+      repo_owner || 'unknown',
+      repo_name || 'unknown',
+      mockAnalysis.niche,
+      mockAnalysis.saas_type,
+      mockAnalysis.nature,
+      JSON.stringify(mockAnalysis.differentiators),
+      JSON.stringify(mockAnalysis.pain_points),
+      JSON.stringify(mockAnalysis.recommended_channels),
+      JSON.stringify(mockAnalysis.channel_justifications)
+    );
+
+    res.json({ analysis: mockAnalysis, stored: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/analysis/latest', (req, res) => {
+  const db = req.app.locals.db;
+  try {
+    const row = db.prepare('SELECT * FROM saas_analyses ORDER BY created_at DESC LIMIT 1').get();
+    if (!row) return res.json({ analysis: null });
+    res.json({
+      analysis: {
+        ...row,
+        differentiators: JSON.parse(row.differentiators || '[]'),
+        pain_points: JSON.parse(row.pain_points || '[]'),
+        recommended_channels: JSON.parse(row.recommended_channels || '[]'),
+        channel_justifications: JSON.parse(row.channel_justifications || '{}'),
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== TOP ENGAGED CONTENT (par plateforme) =====
+router.get('/top-content', (req, res) => {
+  const db = req.app.locals.db;
+  const { platform } = req.query;
+  try {
+    let rows = db.prepare(`
+      SELECT t.*, k.name as kol_name, k.handle, k.platform as kol_platform
+      FROM kol_top_content t
+      LEFT JOIN kols k ON t.kol_id = k.id
+      ORDER BY t.engagement_rate DESC
+    `).all();
+
+    if (platform) {
+      rows = rows.filter(r => r.platform === platform);
+    }
+
+    // Grouper par plateforme pour switch rapide
+    const byPlatform = {};
+    rows.forEach(r => {
+      if (!byPlatform[r.platform]) byPlatform[r.platform] = [];
+      byPlatform[r.platform].push(r);
+    });
+
+    res.json({ content: rows, by_platform: byPlatform });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== KOLs par taux d'engagement =====
+router.get('/kols/by-engagement', (req, res) => {
+  const db = req.app.locals.db;
+  try {
+    const kols = db.prepare(`
+      SELECT k.*, COALESCE(MAX(t.engagement_rate), k.avg_engagement_rate) as top_engagement
+      FROM kols k
+      LEFT JOIN kol_top_content t ON k.id = t.kol_id
+      GROUP BY k.id
+      ORDER BY top_engagement DESC
+    `).all();
+
+    const scored = kols.map(k => ({
+      ...enrichKol(k),
+      top_engagement: k.top_engagement || k.avg_engagement_rate || 0,
+      compatibility_score: k.compatibility_score ?? calculateCompatibilityScore(k),
+    }));
+
+    res.json({ kols: scored });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== STRIPE PAYMENT =====
+router.get('/stripe/config', (req, res) => {
+  const pk = process.env.STRIPE_PUBLISHABLE_KEY;
+  if (!pk) return res.status(503).json({ error: 'Stripe non configuré (STRIPE_PUBLISHABLE_KEY manquant)' });
+  res.json({ publishableKey: pk });
+});
+
+router.post('/stripe/create-payment-intent', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Stripe non configuré' });
+  const { amount, currency = 'eur', metadata = {} } = req.body;
+  const amountCents = Math.round((amount || 0) * 100);
+  if (amountCents < 50) return res.status(400).json({ error: 'Montant minimum 0,50 €' });
+
+  try {
+    const intent = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency,
+      automatic_payment_methods: { enabled: true },
+      metadata,
+    });
+    res.json({ clientSecret: intent.client_secret });
+  } catch (err) {
+    req.app.locals.auditLog?.('STRIPE_ERROR', { message: err.message });
+    res.status(500).json({ error: err.message || 'Erreur Stripe' });
   }
 });
 

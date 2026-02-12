@@ -115,7 +115,7 @@ export default function KOLScoring() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-white truncate">{kol.name}</p>
+                    <p className="font-medium text-white truncate">{kol.name}</p>
                     <span className="w-2 h-2 rounded-full" style={{ background: PLATFORM_CONFIG[kol.platform]?.color }} />
                   </div>
                   <p className="text-xs text-slate-400">{kol.handle} · {kol.followers?.toLocaleString()} · {kol.niche}</p>

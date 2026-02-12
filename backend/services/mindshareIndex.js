@@ -1,31 +1,35 @@
 /**
  * Mindshare Index Service
  * 
- * Agrège des données disparates (vues X, taux ouverture newsletter, etc.)
+ * Agrège des données disparates (vues X, LinkedIn, newsletter, etc.)
  * en un score unique: le Mindshare Index (0-100).
  * 
  * COMPOSANTES ET PONDÉRATIONS:
  * - Portée X/Twitter (impressions + engagement)    : 25%
  * - Performance Newsletter (opens + CTR)            : 20%
  * - Portée YouTube (vues)                           : 15%
- * - Portée Twitch (viewers)                         : 10%
- * - Mentions de marque                              : 15%
- * - Sentiment global                                : 15%
+ * - Portée LinkedIn (impressions + engagement, profils authentiques) : 10%
+ * - Portée Twitch (viewers)                         : 5%
+ * - Mentions de marque                              : 12%
+ * - Sentiment global                                : 13%
  */
 
 const MINDSHARE_WEIGHTS = {
   twitter_score: 0.25,
   newsletter_score: 0.20,
   youtube_score: 0.15,
-  twitch_score: 0.10,
-  mention_score: 0.15,
-  sentiment_score: 0.15,
+  linkedin_score: 0.10,
+  twitch_score: 0.05,
+  mention_score: 0.12,
+  sentiment_score: 0.13,
 };
 
 // Benchmarks pour normalisation (valeurs typiques pour un Micro-SaaS)
 const BENCHMARKS = {
   twitter_impressions: { poor: 1000, good: 10000, excellent: 50000 },
   twitter_engagement: { poor: 1, good: 5, excellent: 12 },
+  linkedin_impressions: { poor: 500, good: 5000, excellent: 25000 },
+  linkedin_engagement: { poor: 0.5, good: 3, excellent: 8 },
   newsletter_opens: { poor: 200, good: 1500, excellent: 5000 },
   newsletter_ctr: { poor: 2, good: 10, excellent: 25 },
   youtube_views: { poor: 100, good: 2000, excellent: 10000 },
@@ -60,6 +64,11 @@ function calculateMindshareIndex(metrics) {
   // Score YouTube
   const youtube_score = normalizeToBenchmark(metrics.youtube_views || 0, 'youtube_views');
 
+  // Score LinkedIn (profils authentiques, impressions + engagement)
+  const linkedinImpr = normalizeToBenchmark(metrics.linkedin_impressions || 0, 'linkedin_impressions');
+  const linkedinEng = normalizeToBenchmark(metrics.linkedin_engagement || 0, 'linkedin_engagement');
+  const linkedin_score = linkedinImpr * 0.5 + linkedinEng * 0.5;
+
   // Score Twitch
   const twitch_score = normalizeToBenchmark(metrics.twitch_viewers || 0, 'twitch_viewers');
 
@@ -74,6 +83,7 @@ function calculateMindshareIndex(metrics) {
     twitter_score * MINDSHARE_WEIGHTS.twitter_score +
     newsletter_score * MINDSHARE_WEIGHTS.newsletter_score +
     youtube_score * MINDSHARE_WEIGHTS.youtube_score +
+    linkedin_score * MINDSHARE_WEIGHTS.linkedin_score +
     twitch_score * MINDSHARE_WEIGHTS.twitch_score +
     mention_score * MINDSHARE_WEIGHTS.mention_score +
     sentiment_score * MINDSHARE_WEIGHTS.sentiment_score;
@@ -84,9 +94,10 @@ function calculateMindshareIndex(metrics) {
       twitter: { score: Math.round(twitter_score * 10) / 10, weight: '25%', impressions: metrics.twitter_impressions, engagement: metrics.twitter_engagement },
       newsletter: { score: Math.round(newsletter_score * 10) / 10, weight: '20%', opens: metrics.newsletter_opens, ctr: metrics.newsletter_ctr },
       youtube: { score: Math.round(youtube_score * 10) / 10, weight: '15%', views: metrics.youtube_views },
-      twitch: { score: Math.round(twitch_score * 10) / 10, weight: '10%', viewers: metrics.twitch_viewers },
-      mentions: { score: Math.round(mention_score * 10) / 10, weight: '15%', count: metrics.brand_mentions },
-      sentiment: { score: Math.round(sentiment_score * 10) / 10, weight: '15%', value: metrics.sentiment },
+      linkedin: { score: Math.round(linkedin_score * 10) / 10, weight: '10%', impressions: metrics.linkedin_impressions, engagement: metrics.linkedin_engagement },
+      twitch: { score: Math.round(twitch_score * 10) / 10, weight: '5%', viewers: metrics.twitch_viewers },
+      mentions: { score: Math.round(mention_score * 10) / 10, weight: '12%', count: metrics.brand_mentions },
+      sentiment: { score: Math.round(sentiment_score * 10) / 10, weight: '13%', value: metrics.sentiment },
     },
     level: index >= 80 ? 'Dominant' : index >= 60 ? 'Fort' : index >= 40 ? 'Croissant' : index >= 20 ? 'Émergent' : 'Invisible',
     color: index >= 80 ? '#10b981' : index >= 60 ? '#6366f1' : index >= 40 ? '#f59e0b' : index >= 20 ? '#f97316' : '#ef4444',
