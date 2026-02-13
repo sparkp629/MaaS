@@ -30,7 +30,7 @@ function StatCard({ icon: Icon, label, value, sub, color = 'indigo' }) {
   );
 }
 
-function TabDiscovery() {
+function TabDiscovery({ kols }) {
   return (
     <div className="space-y-4">
       <p className="text-slate-400 text-sm">
@@ -48,9 +48,31 @@ function TabDiscovery() {
           </div>
         ))}
       </div>
-      <div className="text-slate-500 text-sm mt-6">
-        Aucun KOL chargé. Connecter le backend pour afficher les matches.
-      </div>
+      {kols?.length > 0 ? (
+        <div className="space-y-3 mt-6">
+          {kols.map((k) => (
+            <div
+              key={k.id}
+              className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30 flex items-center justify-between"
+            >
+              <div>
+                <div className="font-medium text-white">{k.displayName}</div>
+                <div className="text-sm text-slate-400">{k.handle} • {k.niche}</div>
+                <div className="text-xs text-slate-500 mt-1">{k.preview}</div>
+              </div>
+              <div className="text-right">
+                <span className="text-indigo-400 font-bold">{k.mindshareIndex}</span>
+                <span className="text-slate-500 text-sm"> MI</span>
+                <span className="mx-2 text-slate-600">|</span>
+                <span className="text-emerald-400 font-bold">{k.conversionScore}</span>
+                <span className="text-slate-500 text-sm"> Conv</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-slate-500 text-sm mt-6">Aucun KOL en base.</div>
+      )}
     </div>
   );
 }
@@ -130,13 +152,19 @@ function TabROI() {
 export default function Dashboard() {
   const [tab, setTab] = useState('discovery');
   const [data, setData] = useState(null);
+  const [kols, setKols] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .getDashboard()
-      .then(setData)
-      .catch(() => setData({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } }))
+    Promise.all([api.getDashboard(), api.getKOLs()])
+      .then(([d, k]) => {
+        setData(d);
+        setKols(k);
+      })
+      .catch(() => {
+        setData({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } });
+        setKols([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -190,7 +218,7 @@ export default function Dashboard() {
 
         {/* Contenu des tabs */}
         <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-6">
-          {tab === 'discovery' && <TabDiscovery />}
+          {tab === 'discovery' && <TabDiscovery kols={kols} />}
           {tab === 'intelligence' && <TabIntelligence />}
           {tab === 'roi' && <TabROI />}
         </div>

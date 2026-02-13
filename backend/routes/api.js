@@ -1,18 +1,14 @@
 import { Router } from 'express';
+import { getDashboardSummary, getSampleKOLs } from '../db/samples.js';
 
 const router = Router();
 
-// Placeholder — à connecter aux services
 router.get('/dashboard', (_, res) => {
-  res.json({
-    kolCount: 0,
-    campaigns: [],
-    mindshare: { value: 0, level: 'Invisible' },
-  });
+  res.json(getDashboardSummary());
 });
 
 router.get('/kol', (_, res) => {
-  res.json([]);
+  res.json(getSampleKOLs());
 });
 
 export { router as apiRouter };
