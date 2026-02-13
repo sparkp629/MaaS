@@ -1,0 +1,21 @@
+services:
+  maas:
+    build:
+      context: ../../..
+      dockerfile: infra/docker/monolith/Dockerfile
+    container_name: maas-monolith
+    restart: unless-stopped
+    env_file:
+      - ../../../.env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_PATH: /data/maas.db
+      FRONTEND_DIST_PATH: /app/frontend/dist
+    ports:
+      - "3001:3001"
+    volumes:
+      - maas_data:/data
+
+volumes:
+  maas_data:

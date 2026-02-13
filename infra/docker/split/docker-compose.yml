@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ../../..
+      dockerfile: infra/docker/split/Dockerfile.backend
+    container_name: maas-backend
+    restart: unless-stopped
+    env_file:
+      - ../../../.env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_PATH: /data/maas.db
+      CORS_ORIGINS: http://localhost:8080
+    volumes:
+      - maas_data:/data
+
+  frontend:
+    build:
+      context: ../../..
+      dockerfile: infra/docker/split/Dockerfile.frontend
+    container_name: maas-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  maas_data:

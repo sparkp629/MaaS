@@ -1,0 +1,11 @@
+# /etc/sudoers.d/maas-deploy
+#
+# Permet au user de déploiement de redémarrer le service sans mot de passe.
+# Remplacer "deploy" par votre utilisateur SSH (ex: ubuntu).
+#
+# Installation:
+#   sudo cp infra/systemd/maas-sudoers /etc/sudoers.d/maas-deploy
+#   sudo visudo -cf /etc/sudoers.d/maas-deploy
+
+deploy ALL=NOPASSWD: /bin/systemctl restart maas, /bin/systemctl is-active maas
+deploy ALL=NOPASSWD: /usr/bin/systemctl restart maas, /usr/bin/systemctl is-active maas
