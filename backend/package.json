@@ -1,12 +1,10 @@
 {
   "name": "maas-backend",
   "version": "1.0.0",
-  "description": "Mindshare-as-a-Service - Backend API",
-  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "start": "node server.js",
     "dev": "node --watch server.js",
-    "seed": "node db/seed.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",

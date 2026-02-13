@@ -1,13 +1,8 @@
 node_modules/
-dist/
 .env
-*.db
-*.sqlite
+*.db-shm
+*.db-wal
+dist/
+.vite/
 .DS_Store
-Thumbs.db
-.vscode/
-.claude/
-.security-check/
-maas.db-shm
-maas.db-wal
 logs/

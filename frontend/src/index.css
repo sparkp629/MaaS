@@ -2,54 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  --bg-card: rgba(30, 41, 59, 0.4);
+  --border-card: rgba(51, 65, 85, 0.3);
+  --accent: 99, 102, 241;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  @apply bg-slate-900 text-slate-100 antialiased;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1e293b;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-@layer utilities {
-  .gradient-maas {
-    background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #06b6d4 100%);
-  }
-  .gradient-text {
-    background: linear-gradient(135deg, #a78bfa, #6366f1, #06b6d4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .glass {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(148, 163, 184, 0.1);
-  }
-  .card-hover {
-    transition: all 0.3s ease;
-  }
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
-  }
+.card-hover {
+  @apply transition hover:border-slate-600/50;
 }
