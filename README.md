@@ -31,6 +31,27 @@ npm run dev
 - Backend: http://localhost:3001
 - Frontend: http://localhost:5173
 
+## Aperçu frontend et test responsive (mobile/tablette)
+
+### Aperçu desktop rapide
+- Frontend (dev): `http://localhost:5173`
+- Frontend (prod-like servi par backend): `http://localhost:3001`
+
+### Test sur mobile/tablette (même réseau Wi-Fi)
+`localhost` sur mobile pointe vers le mobile lui-même.  
+Il faut lancer le frontend en écoute réseau et utiliser l'IP locale de ta machine:
+
+```bash
+cd frontend
+npm run dev:lan
+```
+
+Puis ouvrir sur mobile:
+- `http://<IP_DE_TA_MACHINE>:5173`
+
+Exemple:
+- `http://192.168.1.25:5173`
+
 ## Configuration Backend (.env à la racine)
 
 ```env
