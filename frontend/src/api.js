@@ -11,4 +11,13 @@ export const api = {
     if (!res.ok) throw new Error('KOL fetch failed');
     return res.json();
   },
+  async generateContent(body) {
+    const res = await fetch(`${API_BASE}/content/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('Generate failed');
+    return res.json();
+  },
 };
