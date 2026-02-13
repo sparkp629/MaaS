@@ -40,7 +40,7 @@ export default function CampaignEngine() {
   return (
     <div className="min-h-screen bg-slate-900/40">
       <header className="border-b border-slate-700/30 px-6 py-4">
-        <Link to="/" className="text-slate-400 hover:text-white text-sm mb-2 inline-block">
+        <Link to="/dashboard" className="text-slate-400 hover:text-white text-sm mb-2 inline-block">
           ← Dashboard
         </Link>
         <h1 className="text-xl font-bold text-white">Moteur de campagne</h1>
