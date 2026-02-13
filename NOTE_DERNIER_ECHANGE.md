@@ -16,14 +16,7 @@ Tu as demandé de ne plus attendre ta validation à chaque étape et de dévelop
 - **Aperçu** : http://localhost:5173
 
 ### 3. Clés API
-Variables à renseigner dans `.env` (format prêt à coller) :
-```
-STRIPE_SECRET_KEY=
-STRIPE_PRICE_ID=
-API_KEY_SUPABASE=
-URL_SUPABASE=
-API_KEY_APIFY=
-```
+Liste complète dans `.env.example` : Stripe, Supabase, Apify, X, YouTube, LinkedIn, Meta, TikTok. Le fichier `.env` est gitignoré : aucune clé n’est commitée. Si tu avais ajouté Stripe/YouTube ailleurs (autre projet, fichier supprimé), colle-les dans `.env`. `VITE_SUPABASE_*` est dérivé automatiquement depuis `URL_SUPABASE` et `API_KEY_SUPABASE` par `vite.config.js`.
 
 ### 4. SQLite vs Supabase
 - **SQLite** : base locale, pas de clé API.
@@ -61,14 +54,13 @@ Branches : `stripe`, `dashboard-first`, `login-first`. Variable : `VITE_STRATEGY
 
 ## 3 liens locaux pour voir les 3 approches
 
-```powershell
-# Terminal 1
-npm run dev:default    # http://localhost:5173
-# Terminal 2
-npm run dev:dashboard  # http://localhost:5174
-# Terminal 3
-npm run dev:login      # http://localhost:5175
-```
+**Utiliser http:// (pas https://) pour localhost.**
+
+| Terminal | Commande | URL |
+|----------|----------|-----|
+| 1 | `npm run dev:default` | http://localhost:5173 |
+| 2 | `npm run dev:dashboard` | http://localhost:5174 |
+| 3 | `npm run dev:login` | http://localhost:5175 |
 
 ## Prochaines actions possibles
 

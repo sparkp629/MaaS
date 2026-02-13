@@ -50,7 +50,7 @@ Avec 3 terminaux frontend, vous pouvez voir les 3 approches en même temps :
 # Terminal 1 — Default (Home + Dashboard)
 cd frontend
 npm run dev:default
-# → http://localhost:5173
+# → http://localhost:5173 (attention : http, pas https)
 
 # Terminal 2 — Dashboard-first
 npm run dev:dashboard
@@ -65,22 +65,25 @@ Backend partagé : un seul `npm run dev` dans `backend/` (port 3001). Les 3 fron
 
 ---
 
-## 2. Clés API — à coller dans `.env`
+## 2. Clés API — liste complète
 
-Variables manquantes à ajouter (format prêt à coller) :
+Toutes les APIs mentionnées dans le projet (X, YouTube, LinkedIn, Meta, TikTok, Stripe, Supabase, Apify). Seules celles utilisées actuellement sont obligatoires ; les autres préparent les futures intégrations.
 
-```
-STRIPE_SECRET_KEY=
-STRIPE_PRICE_ID=
-```
-
-Variables déjà présentes :
-
-```
-API_KEY_SUPABASE=
-URL_SUPABASE=
-API_KEY_APIFY=
-```
+| Variable | Réseau / Service | Obligatoire |
+|----------|------------------|-------------|
+| `STRIPE_SECRET_KEY` | Stripe | Checkout |
+| `STRIPE_PRICE_ID` | Stripe | Checkout |
+| `URL_SUPABASE` | Supabase | Auth |
+| `API_KEY_SUPABASE` | Supabase | Auth (VITE_ dérivés auto) |
+| `API_KEY_APIFY` | Apify | Scraping |
+| `X_BEARER_TOKEN` | X (Twitter) | Données X |
+| `YOUTUBE_API_KEY` | YouTube | Données YT |
+| `LINKEDIN_CLIENT_ID` | LinkedIn | OAuth |
+| `LINKEDIN_CLIENT_SECRET` | LinkedIn | OAuth |
+| `META_APP_ID` | Facebook, Instagram | Meta Graph API |
+| `META_APP_SECRET` | Facebook, Instagram | Meta Graph API |
+| `TIKTOK_CLIENT_KEY` | TikTok | Marketing API |
+| `TIKTOK_CLIENT_SECRET` | TikTok | Marketing API |
 
 ### Où les trouver
 

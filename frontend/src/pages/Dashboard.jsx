@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import NetworkIcon from '../components/NetworkIcons';
 import MindshareGauge from '../components/MindshareGauge';
+import ContextRichPreview from '../components/ContextRichPreview';
 
 const TABS = [
   { id: 'discovery', label: 'Discovery', icon: Users },
@@ -40,8 +41,8 @@ function TabDiscovery({ kols }) {
         Match founders ↔ KOLs. Context-Rich Previews : 280 chars X, thumbnails
         YT, LinkedIn, Facebook, TikTok, Instagram.
       </p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {['twitter', 'linkedin', 'youtube', 'newsletter'].map((n) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+        {['twitter', 'linkedin', 'youtube', 'newsletter', 'facebook', 'tiktok', 'instagram'].map((n) => (
           <div
             key={n}
             className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30 flex items-center gap-3"
@@ -52,24 +53,36 @@ function TabDiscovery({ kols }) {
         ))}
       </div>
       {kols?.length > 0 ? (
-        <div className="space-y-3 mt-6">
+        <div className="space-y-6 mt-6">
           {kols.map((k) => (
             <div
               key={k.id}
-              className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30 flex items-center justify-between"
+              className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30"
             >
-              <div>
-                <div className="font-medium text-white">{k.displayName}</div>
-                <div className="text-sm text-slate-400">{k.handle} • {k.niche}</div>
-                <div className="text-xs text-slate-500 mt-1">{k.preview}</div>
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex items-center gap-3">
+                  {k.avatarUrl && (
+                    <img
+                      src={k.avatarUrl}
+                      alt=""
+                      className="w-12 h-12 rounded-full object-cover border border-slate-600"
+                    />
+                  )}
+                  <div>
+                    <div className="font-medium text-white">{k.displayName}</div>
+                    <div className="text-sm text-slate-400">{k.handle} • {k.niche}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{k.preview}</div>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-indigo-400 font-bold">{k.mindshareIndex}</span>
+                  <span className="text-slate-500 text-sm"> MI</span>
+                  <span className="mx-2 text-slate-600">|</span>
+                  <span className="text-emerald-400 font-bold">{k.conversionScore}</span>
+                  <span className="text-slate-500 text-sm"> Conv</span>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-indigo-400 font-bold">{k.mindshareIndex}</span>
-                <span className="text-slate-500 text-sm"> MI</span>
-                <span className="mx-2 text-slate-600">|</span>
-                <span className="text-emerald-400 font-bold">{k.conversionScore}</span>
-                <span className="text-slate-500 text-sm"> Conv</span>
-              </div>
+              <ContextRichPreview kol={k} />
             </div>
           ))}
         </div>
