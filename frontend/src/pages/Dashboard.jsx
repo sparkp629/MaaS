@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Users, BarChart3, TrendingUp } from 'lucide-react';
 import { api } from '../api';
 import NetworkIcon from '../components/NetworkIcons';
@@ -174,9 +175,9 @@ export default function Dashboard() {
         <h1 className="text-xl font-bold text-white">MaaS — Mindshare as a Service</h1>
         <p className="text-slate-400 text-sm mt-0.5">
           Dashboard — Match, Intelligence, ROI
-          <a href="/campaign" className="ml-4 text-indigo-400 hover:text-indigo-300">
-            Moteur de campagne →
-          </a>
+          <Link to="/campaign" className="ml-4 text-indigo-400 hover:text-indigo-300">
+            Moteur de campagne
+          </Link>
         </p>
       </header>
 

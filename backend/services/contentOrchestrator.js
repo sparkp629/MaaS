@@ -3,7 +3,9 @@
  * v1 Lean : templates, pas d'appel LLM
  */
 
-import { v4 as uuid } from 'uuid';
+function uuid() {
+  return crypto.randomUUID();
+}
 
 const TONE_PROFILES = {
   technique: { emoji: 0, style: 'précis, data-driven' },

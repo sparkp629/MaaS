@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Sparkles, FileText, Linkedin, Video } from 'lucide-react';
 import { api } from '../api';
 
@@ -9,6 +10,13 @@ export default function CampaignEngine() {
   const [tone, setTone] = useState('informatif');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const resultRef = useRef(null);
+
+  useEffect(() => {
+    if (result?.hook && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [result]);
 
   const handleGenerate = async () => {
     if (!productName.trim()) return;
@@ -22,7 +30,8 @@ export default function CampaignEngine() {
       });
       setResult(data);
     } catch (e) {
-      setResult({ error: e.message });
+      const msg = e.message || 'Erreur de connexion au serveur. Vérifiez que le backend tourne sur le port 3001.';
+      setResult({ error: msg });
     } finally {
       setLoading(false);
     }
@@ -31,9 +40,9 @@ export default function CampaignEngine() {
   return (
     <div className="min-h-screen bg-slate-900/40">
       <header className="border-b border-slate-700/30 px-6 py-4">
-        <a href="/" className="text-slate-400 hover:text-white text-sm mb-2 inline-block">
+        <Link to="/" className="text-slate-400 hover:text-white text-sm mb-2 inline-block">
           ← Dashboard
-        </a>
+        </Link>
         <h1 className="text-xl font-bold text-white">Moteur de campagne</h1>
         <p className="text-slate-400 text-sm mt-0.5">
           Hook → Thread X, Post LinkedIn, Script Short
@@ -105,7 +114,7 @@ export default function CampaignEngine() {
         )}
 
         {result?.hook && (
-          <div className="space-y-4">
+          <div ref={resultRef} className="space-y-4">
             <div className="p-4 rounded-xl bg-slate-800/30 border border-indigo-500/20">
               <h3 className="text-sm font-medium text-indigo-400 mb-2">Hook</h3>
               <p className="text-white">{result.hook.text}</p>
