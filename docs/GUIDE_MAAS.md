@@ -42,6 +42,27 @@ git checkout stripe
 
 **Pour changer de stratégie** : modifier `VITE_STRATEGY` dans `.env` (frontend) puis relancer `npm run dev`.
 
+### 3 liens locaux distincts (3 frontends en parallèle)
+
+Avec 3 terminaux frontend, vous pouvez voir les 3 approches en même temps :
+
+```powershell
+# Terminal 1 — Default (Home + Dashboard)
+cd frontend
+npm run dev:default
+# → http://localhost:5173
+
+# Terminal 2 — Dashboard-first
+npm run dev:dashboard
+# → http://localhost:5174
+
+# Terminal 3 — Login-first
+npm run dev:login
+# → http://localhost:5175
+```
+
+Backend partagé : un seul `npm run dev` dans `backend/` (port 3001). Les 3 frontends appellent le même API.
+
 ---
 
 ## 2. Clés API — à coller dans `.env`
@@ -70,6 +91,21 @@ API_KEY_APIFY=
 | `API_KEY_SUPABASE` | [Supabase](https://supabase.com/dashboard) → Settings → API → anon public (ou service_role pour backend) |
 | `URL_SUPABASE` | [Supabase](https://supabase.com/dashboard) → Settings → API → Project URL |
 | `API_KEY_APIFY` | [Apify](https://console.apify.com/account/integrations) → API token |
+| `VITE_SUPABASE_URL` | [Supabase](https://supabase.com/dashboard) → Settings → API → Project URL |
+| `VITE_SUPABASE_ANON_KEY` | [Supabase](https://supabase.com/dashboard) → Settings → API → anon public |
+
+### Activer Auth GitHub (connexion réelle)
+
+1. **Supabase** : Authentication → Providers → GitHub → Enable.
+2. **GitHub** : [Settings → Developer settings → OAuth Apps](https://github.com/settings/developers) → New OAuth App.
+   - Homepage : `http://localhost:5173` (ou ton domaine)
+   - Callback : `https://<TON_PROJECT_REF>.supabase.co/auth/v1/callback` (voir Supabase → URL)
+3. Copier Client ID et Client Secret dans Supabase (GitHub provider).
+4. Ajouter dans `.env` :
+   ```
+   VITE_SUPABASE_URL=https://arrmabvwhhqtdfogsplr.supabase.co
+   VITE_SUPABASE_ANON_KEY=<anon key de Supabase>
+   ```
 
 ---
 

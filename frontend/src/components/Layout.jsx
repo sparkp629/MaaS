@@ -35,6 +35,9 @@ export default function Layout() {
             <div className="border-l border-slate-600 pl-4 flex flex-col gap-1">
               {isLoggedIn ? (
                 <>
+                  {user?.avatar && (
+                    <img src={user.avatar} alt="" className="w-6 h-6 rounded-full mr-1" />
+                  )}
                   <span className="text-slate-400 text-xs">{user?.name}</span>
                   <button
                     onClick={logout}
