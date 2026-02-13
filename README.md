@@ -55,9 +55,30 @@ CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 VITE_API_BASE_URL=
 ```
 
-## Déploiement Production (coût minimal, 1 seul serveur Node)
+## Déploiement Production (3 approches)
 
-Le mode recommandé est **mono-serveur**:
+Les 3 approches sont documentées ici:
+- `infra/approaches/README.md`
+
+Résumé rapide:
+- **Approche 1 (recommandée coût minimal)**: VPS Node + systemd + Nginx
+- **Approche 2**: Docker monolith (1 conteneur app)
+- **Approche 3**: Docker split (frontend + backend séparés)
+
+Commandes directes:
+
+```bash
+# Approche 1
+npm run start:approach1
+
+# Approche 2
+npm run start:approach2
+
+# Approche 3
+npm run start:approach3
+```
+
+Le mode recommandé pour la simplicité reste **l'Approche 1**:
 - backend Express + API
 - frontend Vite buildé et servi statiquement par Express
 
@@ -184,12 +205,22 @@ Script utilisé côté serveur:
 
 ```
 MaaS/
-├── package.json                # Scripts racine (setup/build/start/smoke)
+├── package.json                # Scripts racine (inclut start:approach1/2/3)
 ├── .github/
 │   └── workflows/
 │       ├── deploy-vps.yml         # CI/CD minimal vers VPS
 │       └── rollback-vps.yml       # Rollback manuel N-1 / commit cible
 ├── infra/
+│   ├── approaches/README.md       # Détail des 3 approches de déploiement
+│   ├── docker/
+│   │   ├── monolith/
+│   │   │   ├── Dockerfile         # Image unique fullstack
+│   │   │   └── docker-compose.yml # Run Docker monolith
+│   │   └── split/
+│   │       ├── Dockerfile.backend
+│   │       ├── Dockerfile.frontend
+│   │       ├── nginx.frontend.conf
+│   │       └── docker-compose.yml # Run Docker frontend+backend
 │   ├── nginx/maas.conf            # Reverse proxy Nginx
 │   ├── scripts/
 │   │   ├── deploy.sh              # Déploiement SSH + rollback auto N-1

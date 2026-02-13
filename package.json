@@ -5,6 +5,11 @@
     "setup": "npm --prefix backend install && npm --prefix frontend install",
     "build": "npm --prefix frontend run build",
     "start": "npm --prefix backend run start:prod",
-    "smoke": "npm --prefix backend run smoke"
+    "smoke": "npm --prefix backend run smoke",
+    "start:approach1": "npm run start",
+    "start:approach2": "docker compose -f infra/docker/monolith/docker-compose.yml up -d --build",
+    "stop:approach2": "docker compose -f infra/docker/monolith/docker-compose.yml down",
+    "start:approach3": "docker compose -f infra/docker/split/docker-compose.yml up -d --build",
+    "stop:approach3": "docker compose -f infra/docker/split/docker-compose.yml down"
   }
 }
