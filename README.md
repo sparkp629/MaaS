@@ -31,7 +31,7 @@ npm run dev
 - Backend: http://localhost:3001
 - Frontend: http://localhost:5173
 
-## Configuration (.env)
+## Configuration Backend (.env à la racine)
 
 ```env
 SUPABASE_URL=https://xxx.supabase.co
@@ -39,16 +39,57 @@ SUPABASE_KEY=votre_clé
 APIFY_TOKEN=votre_token
 TWITTER_BEARER_TOKEN=votre_bearer_token
 PORT=3001
+NODE_ENV=development
 
-# Frontend (dans frontend/.env, optionnel en dev, utile en déploiement)
-# Exemple: https://api.votre-domaine.com/api
+# Optionnel: liste des origines CORS autorisées (CSV)
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+
+# Optionnel en prod: chemin absolu vers frontend/dist
+# FRONTEND_DIST_PATH=/var/www/maas/frontend/dist
+```
+
+## Configuration Frontend (frontend/.env, optionnel)
+
+```env
+# Laisser vide en déploiement mono-serveur (backend sert déjà /api)
 VITE_API_BASE_URL=
+```
+
+## Déploiement Production (coût minimal, 1 seul serveur Node)
+
+Le mode recommandé est **mono-serveur**:
+- backend Express + API
+- frontend Vite buildé et servi statiquement par Express
+
+```bash
+# 1) Installer les dépendances
+npm run setup
+
+# 2) Builder le frontend
+npm run build
+
+# 3) Configurer la prod
+cp .env.example .env
+# puis mettre NODE_ENV=production et PORT selon votre infra
+
+# 4) Démarrer l'application
+npm run start
+
+# 5) Vérifier la santé applicative
+curl http://localhost:3001/health
+```
+
+Validation backend avant mise en ligne:
+
+```bash
+npm run smoke
 ```
 
 ## Architecture
 
 ```
 MaaS/
+├── package.json                # Scripts racine (setup/build/start/smoke)
 ├── backend/
 │   ├── server.js                 # Serveur Express
 │   ├── db/init.js                # Schema + seed data
@@ -60,6 +101,7 @@ MaaS/
 │       ├── mindshareIndex.js     # Calcul Mindshare Index
 │       └── contentOrchestrator.js # Génération de contenu
 ├── frontend/
+│   ├── .env.example              # Variable VITE_API_BASE_URL
 │   └── src/
 │       ├── App.jsx               # Routing
 │       ├── api.js                # Client API
