@@ -14,10 +14,74 @@ const TEMPORALITIES = [
   { id: 'monthly', label: '3 mois' },
 ];
 
+const TEMPORALITY_DAYS = {
+  daily: 7,
+  weekly: 28,
+  monthly: 90,
+};
+
 function engagementScore(impressions, likes, replies, reposts) {
   const eng = (likes || 0) + (replies || 0) * 2 + (reposts || 0) * 3;
   const base = Math.log10((impressions || 1) + 1) * 10;
   return Math.min(100, Math.round((base + eng * 2) / 2));
+}
+
+function aggregateMindshareByTemporality(history, temporality) {
+  if (!history?.length) return [];
+
+  if (temporality === 'daily') {
+    return history.slice(-7).map(h => ({
+      date: h.date.split('-').slice(1).join('/'),
+      index: h.mindshare_index,
+    }));
+  }
+
+  if (temporality === 'weekly') {
+    const byWeek = {};
+    history.forEach(h => {
+      const d = new Date(h.date);
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - d.getDay());
+      const key = weekStart.toISOString().slice(0, 10);
+      if (!byWeek[key]) byWeek[key] = [];
+      byWeek[key].push(h.mindshare_index);
+    });
+
+    return Object.entries(byWeek)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-4)
+      .map(([key, values]) => ({
+        date: key.split('-').slice(1).join('/'),
+        index: Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10,
+      }));
+  }
+
+  const byMonth = {};
+  history.forEach(h => {
+    const key = h.date.slice(0, 7);
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push(h.mindshare_index);
+  });
+
+  return Object.entries(byMonth)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-3)
+    .map(([key, values]) => ({
+      date: key,
+      index: Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10,
+    }));
+}
+
+function getTemporalityStartDate(temporality) {
+  const days = TEMPORALITY_DAYS[temporality] || TEMPORALITY_DAYS.daily;
+  const start = new Date();
+  start.setDate(start.getDate() - days);
+  return start;
+}
+
+function getCampaignCreatedAtMs(campaign) {
+  const value = Date.parse(campaign.created_at || '');
+  return Number.isNaN(value) ? 0 : value;
 }
 
 export default function CampaignEngine() {
@@ -75,10 +139,15 @@ export default function CampaignEngine() {
     setGenerating(false);
   };
 
-  const chartData = campaignDetail?.history?.slice(-14).map(h => ({
-    date: h.date.split('-').slice(1).join('/'),
-    index: h.mindshare_index,
-  })) || [];
+  const chartData = aggregateMindshareByTemporality(campaignDetail?.history || [], temporality);
+  const periodStart = getTemporalityStartDate(temporality);
+  const visibleCampaigns = campaigns
+    .filter((campaign) => {
+      const createdAtMs = getCampaignCreatedAtMs(campaign);
+      if (!createdAtMs) return true;
+      return createdAtMs >= periodStart.getTime();
+    })
+    .sort((a, b) => getCampaignCreatedAtMs(b) - getCampaignCreatedAtMs(a));
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>;
@@ -255,7 +324,7 @@ export default function CampaignEngine() {
             </div>
           </div>
           <div className="space-y-3">
-            {campaigns.map(c => {
+            {visibleCampaigns.map(c => {
               const score = engagementScore(c.impressions, c.conversions, Math.round(c.conversions * 0.3), Math.round(c.conversions * 0.1));
               const content = c.thread_content || `${c.product_name} — ${c.niche}`;
               const preview = content.slice(0, 280) + (content.length > 280 ? '…' : '');
@@ -290,6 +359,11 @@ export default function CampaignEngine() {
                 </div>
               );
             })}
+            {visibleCampaigns.length === 0 && (
+              <p className="text-sm text-slate-500 text-center py-8">
+                Aucun post trouvé sur la période sélectionnée.
+              </p>
+            )}
           </div>
         </div>
 

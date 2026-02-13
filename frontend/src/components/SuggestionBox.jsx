@@ -41,7 +41,7 @@ export default function SuggestionBox() {
       >
         <MessageSquarePlus className="w-4 h-4" />
         <span>Suggérer une amélioration (anonyme)</span>
-        {open ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
       </button>
 
       {open && (

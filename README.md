@@ -19,6 +19,8 @@ Analyse de marché, scoring KOL, orchestration de campagnes et tracking ROI.
 cd backend
 npm install
 npm run dev
+# (optionnel) valider les endpoints critiques
+npm run smoke
 
 # 2. Frontend (dans un autre terminal)
 cd frontend
@@ -37,6 +39,10 @@ SUPABASE_KEY=votre_clé
 APIFY_TOKEN=votre_token
 TWITTER_BEARER_TOKEN=votre_bearer_token
 PORT=3001
+
+# Frontend (dans frontend/.env, optionnel en dev, utile en déploiement)
+# Exemple: https://api.votre-domaine.com/api
+VITE_API_BASE_URL=
 ```
 
 ## Architecture
@@ -47,6 +53,7 @@ MaaS/
 │   ├── server.js                 # Serveur Express
 │   ├── db/init.js                # Schema + seed data
 │   ├── routes/api.js             # Endpoints API
+│   ├── scripts/smoke-test.js     # Smoke test backend
 │   └── services/
 │       ├── marketAnalysis.js     # Audit de marché
 │       ├── kolScoring.js         # Scoring KOL (10 variables)
