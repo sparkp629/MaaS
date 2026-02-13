@@ -85,11 +85,62 @@ Validation backend avant mise en ligne:
 npm run smoke
 ```
 
+## Déploiement VPS (Nginx + systemd)
+
+Templates fournis:
+- `infra/nginx/maas.conf`
+- `infra/systemd/maas.service`
+
+Procédure standard (Ubuntu/Debian):
+
+```bash
+# 1) Déployer le code sur le VPS
+sudo mkdir -p /opt/maas/current /opt/maas/shared
+sudo chown -R $USER:$USER /opt/maas
+
+# 2) Installer et builder
+cd /opt/maas/current
+npm run setup
+npm run build
+
+# 3) Configurer l'environnement runtime
+cp .env.example /opt/maas/shared/.env
+# puis éditer /opt/maas/shared/.env (NODE_ENV=production, CORS_ORIGINS, tokens, etc.)
+
+# 4) Installer le service systemd
+sudo cp infra/systemd/maas.service /etc/systemd/system/maas.service
+# IMPORTANT: adapter WorkingDirectory / EnvironmentFile / User dans le fichier
+sudo systemctl daemon-reload
+sudo systemctl enable --now maas
+sudo systemctl status maas
+
+# 5) Installer la conf Nginx
+sudo cp infra/nginx/maas.conf /etc/nginx/sites-available/maas.conf
+# IMPORTANT: remplacer server_name par votre domaine
+sudo ln -sf /etc/nginx/sites-available/maas.conf /etc/nginx/sites-enabled/maas.conf
+sudo nginx -t
+sudo systemctl reload nginx
+
+# 6) Option HTTPS automatique (Let's Encrypt)
+sudo certbot --nginx -d maas.example.com
+```
+
+Vérifications post-déploiement:
+
+```bash
+curl http://127.0.0.1:3001/health
+curl https://maas.example.com/health
+curl https://maas.example.com/api/dashboard
+```
+
 ## Architecture
 
 ```
 MaaS/
 ├── package.json                # Scripts racine (setup/build/start/smoke)
+├── infra/
+│   ├── nginx/maas.conf            # Reverse proxy Nginx
+│   └── systemd/maas.service       # Service Linux de l'app
 ├── backend/
 │   ├── server.js                 # Serveur Express
 │   ├── db/init.js                # Schema + seed data

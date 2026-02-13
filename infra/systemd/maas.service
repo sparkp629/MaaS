@@ -1,0 +1,35 @@
+# /etc/systemd/system/maas.service
+#
+# Ajuster les chemins avant activation:
+# - WorkingDirectory
+# - EnvironmentFile
+# - User / Group
+#
+# Activation:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now maas
+#   sudo systemctl status maas
+
+[Unit]
+Description=MaaS application service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/maas/current
+Environment=NODE_ENV=production
+Environment=PORT=3001
+EnvironmentFile=/opt/maas/shared/.env
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
