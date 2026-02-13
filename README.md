@@ -142,6 +142,7 @@ Principe:
 1. Vérifie le code (install + smoke + build)
 2. Se connecte en SSH au VPS
 3. Exécute `infra/scripts/deploy.sh` (git pull, build, restart, healthcheck)
+4. Si échec post-déploiement: rollback automatique vers N-1 (commit précédent)
 
 Secrets GitHub à configurer (Repository Settings → Secrets and variables → Actions):
 
@@ -166,16 +167,33 @@ Pré-requis VPS pour le user SSH:
 Template sudoers fourni:
 - `infra/systemd/maas-sudoers`
 
+### Rollback manuel (sécurité supplémentaire)
+
+Workflow dédié:
+- `.github/workflows/rollback-vps.yml`
+
+Fonctionnement:
+- déclenchement manuel uniquement
+- rollback vers N-1 par défaut
+- ou vers un commit spécifique (`target_commit`)
+
+Script utilisé côté serveur:
+- `infra/scripts/rollback-last.sh`
+
 ## Architecture
 
 ```
 MaaS/
 ├── package.json                # Scripts racine (setup/build/start/smoke)
 ├── .github/
-│   └── workflows/deploy-vps.yml   # CI/CD minimal vers VPS
+│   └── workflows/
+│       ├── deploy-vps.yml         # CI/CD minimal vers VPS
+│       └── rollback-vps.yml       # Rollback manuel N-1 / commit cible
 ├── infra/
 │   ├── nginx/maas.conf            # Reverse proxy Nginx
-│   ├── scripts/deploy.sh          # Script de déploiement SSH
+│   ├── scripts/
+│   │   ├── deploy.sh              # Déploiement SSH + rollback auto N-1
+│   │   └── rollback-last.sh       # Rollback manuel N-1 / commit cible
 │   └── systemd/
 │       ├── maas.service           # Service Linux de l'app
 │       └── maas-sudoers           # Droits sudo minimaux (restart/status)
