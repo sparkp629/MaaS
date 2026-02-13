@@ -133,14 +133,52 @@ curl https://maas.example.com/health
 curl https://maas.example.com/api/dashboard
 ```
 
+## CI/CD minimaliste (GitHub Actions + SSH)
+
+Le workflow est fourni dans:
+- `.github/workflows/deploy-vps.yml`
+
+Principe:
+1. Vérifie le code (install + smoke + build)
+2. Se connecte en SSH au VPS
+3. Exécute `infra/scripts/deploy.sh` (git pull, build, restart, healthcheck)
+
+Secrets GitHub à configurer (Repository Settings → Secrets and variables → Actions):
+
+| Secret | Obligatoire | Exemple |
+|--------|-------------|---------|
+| `VPS_HOST` | Oui | `203.0.113.10` |
+| `VPS_USER` | Oui | `deploy` |
+| `VPS_SSH_KEY` | Oui | Clé privée OpenSSH (multi-lignes) |
+| `VPS_PORT` | Non | `22` |
+| `VPS_APP_DIR` | Non | `/opt/maas/current` |
+| `VPS_SERVICE_NAME` | Non | `maas` |
+| `VPS_HEALTHCHECK_URL` | Non | `http://127.0.0.1:3001/health` |
+
+Déclenchement:
+- automatique sur push `main`
+- manuel via `workflow_dispatch` (branche sélectionnable)
+
+Pré-requis VPS pour le user SSH:
+- accès en écriture au dossier applicatif
+- droit de redémarrer le service systemd
+
+Template sudoers fourni:
+- `infra/systemd/maas-sudoers`
+
 ## Architecture
 
 ```
 MaaS/
 ├── package.json                # Scripts racine (setup/build/start/smoke)
+├── .github/
+│   └── workflows/deploy-vps.yml   # CI/CD minimal vers VPS
 ├── infra/
 │   ├── nginx/maas.conf            # Reverse proxy Nginx
-│   └── systemd/maas.service       # Service Linux de l'app
+│   ├── scripts/deploy.sh          # Script de déploiement SSH
+│   └── systemd/
+│       ├── maas.service           # Service Linux de l'app
+│       └── maas-sudoers           # Droits sudo minimaux (restart/status)
 ├── backend/
 │   ├── server.js                 # Serveur Express
 │   ├── db/init.js                # Schema + seed data
