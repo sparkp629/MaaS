@@ -13,7 +13,6 @@ const RAW_KOLS = [
     displayName: 'Sarah Chen',
     followers: 7200,
     niche: 'Dev Tools',
-    nicheDisplay: 'Outils pour développeurs',
     twitter: { impressions: 15000, engagementRate: 6.2 },
     newsletter: { opens: 42, ctr: 4.1 },
     youtube: { views: 8000 },
@@ -29,7 +28,6 @@ const RAW_KOLS = [
     displayName: 'Alex Rivera',
     followers: 4500,
     niche: 'No-code',
-    nicheDisplay: 'Sans code',
     twitter: { impressions: 8000, engagementRate: 8.1 },
     newsletter: { opens: 55, ctr: 5.2 },
     mentions: 8,
@@ -43,7 +41,6 @@ const RAW_KOLS = [
     displayName: 'Jordan Kim',
     followers: 12000,
     niche: 'API-first',
-    nicheDisplay: 'Logiciels connectés',
     twitter: { impressions: 45000, engagementRate: 4.1 },
     newsletter: { opens: 35, ctr: 2.8 },
     linkedin: { impressions: 12000, engagementRate: 2.1 },
@@ -75,11 +72,11 @@ export function getSampleKOLs() {
       handle: raw.handle,
       displayName: raw.displayName,
       followers: raw.followers,
-      niche: raw.nicheDisplay || raw.niche,
+      niche: raw.niche,
       conversionScore: conv.value,
       mindshareIndex: mi.value,
       isMicroKOL: conv.isMicroKOL,
-      preview: `Partage sa progression publiquement • ${raw.nicheDisplay || raw.niche} • ${raw.followers.toLocaleString('fr-FR')} abonnés`,
+      preview: `Building in public • ${raw.niche} • ${raw.followers} followers`,
     };
   });
 }
@@ -91,14 +88,14 @@ export function getDashboardSummary() {
     : 0;
   const level =
     avgMI >= 80
-      ? 'Très influent'
+      ? 'Dominant'
       : avgMI >= 60
         ? 'Fort'
         : avgMI >= 40
-          ? 'En croissance'
+          ? 'Croissant'
           : avgMI >= 20
-            ? 'En émergence'
-            : 'À développer';
+            ? 'Émergent'
+            : 'Invisible';
   return {
     kolCount: kols.length,
     campaigns: [],

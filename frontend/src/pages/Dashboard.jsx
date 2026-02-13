@@ -4,9 +4,9 @@ import { api } from '../api';
 import NetworkIcon from '../components/NetworkIcons';
 
 const TABS = [
-  { id: 'discovery', label: 'Trouver des influenceurs', icon: Users },
-  { id: 'intelligence', label: 'Marché & concurrents', icon: BarChart3 },
-  { id: 'roi', label: 'Résultats & budget', icon: TrendingUp },
+  { id: 'discovery', label: 'Discovery', icon: Users },
+  { id: 'intelligence', label: 'Intelligence', icon: BarChart3 },
+  { id: 'roi', label: 'ROI / Attribution', icon: TrendingUp },
 ];
 
 function StatCard({ icon: Icon, label, value, sub, color = 'indigo' }) {
@@ -34,7 +34,8 @@ function TabDiscovery({ kols }) {
   return (
     <div className="space-y-4">
       <p className="text-slate-400 text-sm">
-        Associez votre produit aux influenceurs dont l'audience correspond le mieux. Aperçus de leurs posts (X, LinkedIn, YouTube, newsletters…).
+        Match founders ↔ KOLs. Context-Rich Previews : 280 chars X, thumbnails
+        YT, LinkedIn, Facebook, TikTok, Instagram.
       </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {['twitter', 'linkedin', 'youtube', 'newsletter'].map((n) => (
@@ -59,21 +60,18 @@ function TabDiscovery({ kols }) {
                 <div className="text-sm text-slate-400">{k.handle} • {k.niche}</div>
                 <div className="text-xs text-slate-500 mt-1">{k.preview}</div>
               </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right" title="À quel point cette personne compte dans son domaine (X, newsletter, YouTube, etc.)">
-                  <div className="text-indigo-400 font-bold text-lg">{k.mindshareIndex}</div>
-                  <div className="text-slate-500 text-xs">Influence dans la niche</div>
-                </div>
-                <div className="text-right" title="Probabilité que son audience convertisse (achète, s’inscrive, etc.)">
-                  <div className="text-emerald-400 font-bold text-lg">{k.conversionScore}</div>
-                  <div className="text-slate-500 text-xs">Potentiel de vente</div>
-                </div>
+              <div className="text-right">
+                <span className="text-indigo-400 font-bold">{k.mindshareIndex}</span>
+                <span className="text-slate-500 text-sm"> MI</span>
+                <span className="mx-2 text-slate-600">|</span>
+                <span className="text-emerald-400 font-bold">{k.conversionScore}</span>
+                <span className="text-slate-500 text-sm"> Conv</span>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-slate-500 text-sm mt-6">Aucun influenceur en base pour le moment.</div>
+        <div className="text-slate-500 text-sm mt-6">Aucun KOL en base.</div>
       )}
     </div>
   );
@@ -83,27 +81,27 @@ function TabIntelligence() {
   return (
     <div className="space-y-4">
       <p className="text-slate-400 text-sm">
-        Où trouver vos clients idéaux et quelles lacunes exploitent vos concurrents.
+        Top 5 segments Micro-SaaS et Competitor Weakness Matrix.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
           <h3 className="text-sm font-medium text-indigo-400 mb-2">
-            Marchés où les créateurs cherchent de la visibilité
+            Segments à fort besoin
           </h3>
           <ul className="text-slate-500 text-sm space-y-1">
-            <li>— Outils pour développeurs</li>
+            <li>— Dev Tools</li>
             <li>— No-code / Low-code</li>
-            <li>— Logiciels API-first</li>
-            <li>— CRM de niche</li>
-            <li>— Données et analytics</li>
+            <li>— API-first SaaS</li>
+            <li>— CRM niche</li>
+            <li>— Analytics</li>
           </ul>
         </div>
         <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
           <h3 className="text-sm font-medium text-indigo-400 mb-2">
-            Faiblesses courantes de vos concurrents
+            Competitor Weakness Matrix
           </h3>
           <p className="text-slate-500 text-sm">
-            Contenu trop technique, suivi des ventes flou, tarifs rigides — autant d’angles pour vous différencier.
+            Profondeur technique, ROI tracking, rigidité pricing.
           </p>
         </div>
       </div>
@@ -115,35 +113,35 @@ function TabROI() {
   return (
     <div className="space-y-4">
       <p className="text-slate-400 text-sm">
-        Suivi des clics, vues, évolution de votre visibilité et montant dépensé.
+        Clicks, impressions, Mindshare Growth vs Spend — vue single-page.
       </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           icon={TrendingUp}
-          label="Clics"
+          label="Clicks"
           value="0"
-          sub="Personnes ayant cliqué"
+          sub="Total campagne"
           color="emerald"
         />
         <StatCard
           icon={BarChart3}
-          label="Vues"
+          label="Impressions"
           value="0"
-          sub="Personnes ayant vu vos posts"
+          sub="Total campagne"
           color="cyan"
         />
         <StatCard
           icon={TrendingUp}
-          label="Visibilité"
+          label="Mindshare Growth"
           value="0%"
-          sub="Évolution de votre notoriété"
+          sub="Évolution"
           color="indigo"
         />
         <StatCard
           icon={BarChart3}
-          label="Dépensé"
+          label="Spend"
           value="0 €"
-          sub="Budget engagé en campagnes"
+          sub="Budget engagé"
           color="amber"
         />
       </div>
@@ -164,7 +162,7 @@ export default function Dashboard() {
         setKols(k);
       })
       .catch(() => {
-        setData({ kolCount: 0, mindshare: { value: 0, level: 'À développer' } });
+        setData({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } });
         setKols([]);
       })
       .finally(() => setLoading(false));
@@ -173,9 +171,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-900/40">
       <header className="border-b border-slate-700/30 px-6 py-4">
-        <h1 className="text-xl font-bold text-white">MaaS</h1>
+        <h1 className="text-xl font-bold text-white">MaaS — Mindshare as a Service</h1>
         <p className="text-slate-400 text-sm mt-0.5">
-          Trouvez des influenceurs qui convertissent — pas seulement des comptes à nombreux followers.
+          Dashboard — Match, Intelligence, ROI
         </p>
       </header>
 
@@ -185,16 +183,16 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <StatCard
               icon={Users}
-              label="Influenceurs"
+              label="KOLs"
               value={data?.kolCount ?? 0}
-              sub="Référencés"
+              sub="En base"
               color="indigo"
             />
             <StatCard
               icon={BarChart3}
-              label="Niveau d'influence moyen"
+              label="Mindshare"
               value={data?.mindshare?.value ?? 0}
-              sub={data?.mindshare?.level ?? 'À développer'}
+              sub={data?.mindshare?.level ?? 'Invisible'}
               color="emerald"
             />
           </div>
