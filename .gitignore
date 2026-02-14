@@ -8,3 +8,6 @@ dist/
 .DS_Store
 logs/
 .security-check/
+
+# Règles Cursor : garder en local uniquement, ne pas pousser sur GitHub
+.cursor/rules/
