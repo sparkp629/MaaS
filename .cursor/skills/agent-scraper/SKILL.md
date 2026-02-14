@@ -1,18 +1,36 @@
 ---
 name: agent-scraper
-description: Handles exclusively the ingestion of X (Twitter) data and newsletters for the MaaS platform. Use when fetching tweets, metrics from X API, scraping profiles, collecting newsletter stats (opens, CTR), or integrating new sources for mindshare analytics.
+description: Sources principales : X (Twitter) et newsletters. Autres sources (LinkedIn, YouTube, TikTok) selon besoin et disponibilité des APIs. Use when fetching tweets, metrics from X API, scraping profiles, newsletter stats (opens, CTR), or integrating new data sources for mindshare analytics.
 ---
 
-# Agent Scraper — Ingestion X & Newsletters
+# Agent Scraper — Ingestion de données
 
-Sous-agent dédié à la collecte et l'ingestion des données X et newsletters pour MaaS. Ne traite aucune autre source (LinkedIn, YouTube, etc.).
+Sous-agent dédié à la collecte et l'ingestion des données pour MaaS.
 
 ---
 
-## Périmètre strict
+## Périmètre
 
-- **Inclus** : X (Twitter) API v2, profils publics X, métriques tweets, newsletters (stats opens/CTR)
-- **Exclu** : LinkedIn, YouTube, Twitch, autres plateformes (déléguer au contexte principal)
+- **Sources principales** : X (Twitter) API v2, profils publics X, métriques tweets, newsletters (stats opens/CTR)
+- **Autres sources selon besoin** : LinkedIn, YouTube, TikTok, Meta — si l'utilisateur le demande et qu'une API existe
+
+---
+
+## Exemples de prompts (quand m'invoquer)
+
+- « Récupérer les impressions X pour un KOL »
+- « Intégrer Resend comme source newsletter »
+- « Ajouter YouTube aux métriques mindshare »
+- « Scraper les métriques TikTok d'un profil »
+- « Mapper les données LinkedIn vers mindshare_metrics »
+
+---
+
+## Quand ne pas m'invoquer
+
+- Transformation Hook → contenu → `content-orchestrator`
+- Calcul Mindshare Index, pondérations → `niche-scoring-logic`
+- Auth, Stripe, config → `core-infra`
 
 ---
 

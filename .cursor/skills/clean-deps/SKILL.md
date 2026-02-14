@@ -7,13 +7,28 @@ description: Analyze project dependencies and suggest removing unused or obsolet
 
 Analyse les dépendances du projet (npm, pnpm, yarn) et propose de supprimer les packages inutiles ou obsolètes pour une stack Lean.
 
-## Quand appliquer ce skill
+## Périmètre
 
-- Audit des dépendances (frontend, backend, monorepo)
-- Réduction de la taille du bundle ou des node_modules
-- Détection de packages obsolètes ou dépréciés
-- Demande de stack "Lean" ou minimaliste
-- Préparation avant mise en production
+- **Inclus** : Analyse package.json, détection packages inutilisés, obsolètes, doublons
+- **Exclu** : Ajout de packages, logique métier, UI
+
+---
+
+## Exemples de prompts (quand m'invoquer)
+
+- « Auditer les dépendances du projet »
+- « Supprimer les packages inutilisés »
+- « Réduire la taille du bundle frontend »
+- « Remplacer moment par dayjs »
+- « Vérifier les packages obsolètes »
+
+---
+
+## Quand ne pas m'invoquer
+
+- Implémentation d'une feature → compétence par défaut
+- UI, composants → `agent-frontend`
+- Config Auth, Stripe → `core-infra`
 
 ---
 

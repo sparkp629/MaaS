@@ -88,3 +88,66 @@ export function getRoiSummary() {
     mindshareGrowth: 0,
   };
 }
+
+// --- Payments ---
+
+export function markPaymentComplete({ stripeSessionId, email, amountTotal, currency }) {
+  const db = getDb();
+  db.prepare(
+    `INSERT OR IGNORE INTO payments (stripe_session_id, email, amount_total, currency)
+     VALUES (?, ?, ?, ?)`
+  ).run(stripeSessionId, email, amountTotal, currency);
+}
+
+export function getPaymentBySession(stripeSessionId) {
+  const db = getDb();
+  return db.prepare('SELECT * FROM payments WHERE stripe_session_id = ?').get(stripeSessionId);
+}
+
+// --- KOL Metrics ---
+
+export function upsertKolMetric({ platform, platformUserId, handle, displayName, followers, impressions, engagementRate, views, subscribers, extra }) {
+  const db = getDb();
+  const existing = db.prepare(
+    'SELECT id FROM kol_metrics WHERE platform = ? AND platform_user_id = ?'
+  ).get(platform, platformUserId);
+
+  if (existing) {
+    db.prepare(
+      `UPDATE kol_metrics SET handle = ?, display_name = ?, followers = ?, impressions = ?,
+       engagement_rate = ?, views = ?, subscribers = ?, extra_json = ?, fetched_at = datetime('now')
+       WHERE id = ?`
+    ).run(handle, displayName, followers || 0, impressions || 0, engagementRate || 0, views || 0, subscribers || 0, extra ? JSON.stringify(extra) : null, existing.id);
+    return { id: existing.id, updated: true };
+  }
+
+  const result = db.prepare(
+    `INSERT INTO kol_metrics (platform, platform_user_id, handle, display_name, followers, impressions, engagement_rate, views, subscribers, extra_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(platform, platformUserId, handle, displayName, followers || 0, impressions || 0, engagementRate || 0, views || 0, subscribers || 0, extra ? JSON.stringify(extra) : null);
+  return { id: result.lastInsertRowid, updated: false };
+}
+
+export function getKolMetrics(platform = null) {
+  const db = getDb();
+  if (platform) {
+    return db.prepare('SELECT * FROM kol_metrics WHERE platform = ? ORDER BY fetched_at DESC').all(platform);
+  }
+  return db.prepare('SELECT * FROM kol_metrics ORDER BY fetched_at DESC').all();
+}
+
+// --- Tracking (clics/impressions réels) ---
+
+export function trackClick(campaignId, kolId, source) {
+  const db = getDb();
+  const id = crypto.randomUUID();
+  db.prepare('INSERT INTO clicks (id, campaign_id, kol_id, source) VALUES (?, ?, ?, ?)').run(id, campaignId, kolId, source);
+  return { id };
+}
+
+export function trackImpression(campaignId, kolId, source, count = 1) {
+  const db = getDb();
+  const id = crypto.randomUUID();
+  db.prepare('INSERT INTO impressions (id, campaign_id, kol_id, count, source) VALUES (?, ?, ?, ?, ?)').run(id, campaignId, kolId, count, source);
+  return { id };
+}

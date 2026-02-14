@@ -7,12 +7,29 @@ description: Expert Data Science pour implémenter scores composites type "Minds
 
 Expert en Data Science pour scores composites (Mindshare Index et dérivés) — sans pandas, scikit-learn ni numpy. Uniquement formules et algorithmes de pondération en pur JavaScript/TypeScript.
 
-## Quand appliquer
+## Périmètre
 
-- Implémentation ou refonte du Mindshare Index
-- Nouveau score composite pour une niche (KOL, SaaS, influence)
-- Optimisation des pondérations ou de la normalisation
-- Choix d'un algorithme de scoring sans dépendances lourdes
+- **Inclus** : Mindshare Index, scores composites, pondérations, normalisation (0–100), paliers
+- **Exclu** : Ingestion données, génération contenu, UI des graphiques
+
+---
+
+## Exemples de prompts (quand m'invoquer)
+
+- « Revoir les pondérations du Mindshare Index »
+- « Ajouter une dimension TikTok au score »
+- « Changer l'algorithme de normalisation des impressions »
+- « Définir les paliers poor/good/excellent pour newsletter »
+- « Implémenter un score composite sans pandas »
+
+---
+
+## Quand ne pas m'invoquer
+
+- Récupération métriques X/newsletters → `agent-scraper`
+- Hook → contenu → `content-orchestrator`
+- Affichage gauge, graphiques → `agent-frontend`
+- Auth, Stripe → `core-infra`
 
 ---
 

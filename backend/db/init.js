@@ -70,5 +70,32 @@ function initSchema(db) {
       category TEXT,
       timestamp TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stripe_session_id TEXT UNIQUE,
+      email TEXT,
+      amount_total INTEGER,
+      currency TEXT,
+      status TEXT DEFAULT 'completed',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_payments_email ON payments(email);
+
+    CREATE TABLE IF NOT EXISTS kol_metrics (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      platform TEXT NOT NULL,
+      platform_user_id TEXT,
+      handle TEXT,
+      display_name TEXT,
+      followers INTEGER DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      engagement_rate REAL DEFAULT 0,
+      views INTEGER DEFAULT 0,
+      subscribers INTEGER DEFAULT 0,
+      extra_json TEXT,
+      fetched_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_kol_platform ON kol_metrics(platform, platform_user_id);
   `);
 }

@@ -20,6 +20,25 @@ Sous-agent dédié à la transformation d'un **Hook** en 3 formats distribuables
 
 ---
 
+## Exemples de prompts (quand m'invoquer)
+
+- « Générer un thread X à partir de ce Hook »
+- « Adapter ce Hook en post LinkedIn »
+- « Créer le script Short pour une démo produit »
+- « Ajouter un nouveau profil de ton (sarcastique) »
+- « Le Hook est trop long, le condenser »
+
+---
+
+## Quand ne pas m'invoquer
+
+- Récupération métriques X/newsletters → `agent-scraper`
+- Calcul Mindshare, pondérations → `niche-scoring-logic`
+- Composants Dashboard, UI → `agent-frontend`
+- Auth, Stripe, .env → `core-infra`
+
+---
+
 ## Architecture des Cascading Prompts
 
 ```

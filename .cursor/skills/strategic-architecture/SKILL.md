@@ -7,13 +7,27 @@ description: Models SaaS/MaaS business architectures and compares cost structure
 
 Expertise en modélisation des modèles d'affaires SaaS/MaaS et en comparaison des structures de coûts (humain vs. automatisé).
 
-## Quand appliquer ce skill
+## Périmètre
 
-- Modélisation de revenus ou de prix pour un SaaS ou MaaS
-- Choix entre infrastructure gérée manuellement et automatisée
-- Estimation du coût total de possession (TCO)
-- Analyse de seuil de rentabilité (break-even)
-- Discussion sur l’arbitrage humain/automatisation
+- **Inclus** : Modèles d'affaires SaaS/MaaS, TCO, break-even, comparaison humain vs automatisé
+- **Exclu** : Implémentation code, choix techniques stack, ingestion données
+
+---
+
+## Exemples de prompts (quand m'invoquer)
+
+- « Comparer le coût humain vs automatisé pour 1000 KOLs »
+- « Quel seuil de rentabilité pour un MaaS à 49€/mois ? »
+- « Modéliser un modèle freemium pour MaaS »
+- « TCO d'une équipe 3 personnes vs tout automatisé »
+
+---
+
+## Quand ne pas m'invoquer
+
+- Codage, intégration API → compétence par défaut ou skills dédiés
+- Calcul Mindshare, pondérations → `niche-scoring-logic`
+- Flux paiement x402, A2A → `agentic-governance`
 
 ---
 

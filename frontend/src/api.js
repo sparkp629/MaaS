@@ -1,54 +1,80 @@
 const API_BASE = '/api';
 
+async function safeFetch(url, options = {}) {
+  const res = await fetch(url, options);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+  return data;
+}
+
 export const api = {
   async getDashboard() {
-    const res = await fetch(`${API_BASE}/dashboard`);
-    if (!res.ok) throw new Error('Dashboard fetch failed');
-    return res.json();
+    return safeFetch(`${API_BASE}/dashboard`);
   },
   async getKOLs() {
-    const res = await fetch(`${API_BASE}/kol`);
-    if (!res.ok) throw new Error('KOL fetch failed');
-    return res.json();
+    return safeFetch(`${API_BASE}/kol`);
   },
   async getIntelligence() {
-    const res = await fetch(`${API_BASE}/intelligence`);
-    if (!res.ok) throw new Error('Intelligence fetch failed');
-    return res.json();
+    return safeFetch(`${API_BASE}/intelligence`);
   },
   async getRoi() {
-    const res = await fetch(`${API_BASE}/roi`);
-    if (!res.ok) throw new Error('ROI fetch failed');
-    return res.json();
+    return safeFetch(`${API_BASE}/roi`);
   },
   async generateContent(body) {
-    const res = await fetch(`${API_BASE}/content/generate`, {
+    return safeFetch(`${API_BASE}/content/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-    return data;
   },
   async submitSuggestion(text) {
-    const res = await fetch(`${API_BASE}/suggestions`, {
+    return safeFetch(`${API_BASE}/suggestions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-    return data;
   },
   async createCheckoutSession(options = {}) {
-    const res = await fetch(`${API_BASE}/checkout/create-session`, {
+    return safeFetch(`${API_BASE}/checkout/create-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(options),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-    return data;
+  },
+
+  // --- KOL Metrics (données réelles) ---
+  async getKolMetrics(platform = null) {
+    const url = platform
+      ? `${API_BASE}/kol/metrics/${platform}`
+      : `${API_BASE}/kol/metrics`;
+    return safeFetch(url);
+  },
+  async fetchXKol(username) {
+    return safeFetch(`${API_BASE}/kol/fetch/x`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+  },
+  async fetchYouTubeKol(channelId) {
+    return safeFetch(`${API_BASE}/kol/fetch/youtube`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channelId }),
+    });
+  },
+
+  // --- API Status ---
+  async getApiStatus() {
+    return safeFetch(`${API_BASE}/status/apis`);
+  },
+
+  // --- Tracking ---
+  async trackImpression(campaignId, kolId, source, count = 1) {
+    return safeFetch(`${API_BASE}/track/impression`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ campaignId, kolId, source, count }),
+    });
   },
 };

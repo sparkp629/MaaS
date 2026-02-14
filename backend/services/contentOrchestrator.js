@@ -1,7 +1,9 @@
 /**
  * Content Orchestrator — Hook → 3 formats (X Thread, LinkedIn, Short)
- * v1 Lean : templates, pas d'appel LLM
+ * v2 : LLM si configuré, sinon fallback templates
  */
+
+import * as llm from './llmClient.js';
 
 function uuid() {
   return crypto.randomUUID();
@@ -120,6 +122,7 @@ export function generateShortContent(hook, productName, niche, tone = 'informati
 
 /**
  * Orchestre : Hook → 3 formats
+ * Si LLM configuré → contenu IA. Sinon → templates statiques (fallback)
  */
 export function orchestrate(productName, productDescription, niche, tone = 'informatif') {
   const hook = extractHook(productName, productDescription, niche);
@@ -130,5 +133,74 @@ export function orchestrate(productName, productDescription, niche, tone = 'info
       linkedin: generateLinkedInPost(hook, productName, niche, tone),
       short: generateShortContent(hook, productName, niche, tone),
     },
+    llmAvailable: llm.isConfigured(),
   };
+}
+
+/**
+ * Orchestre avec LLM (async) — contenu IA si configuré, sinon fallback templates
+ */
+export async function orchestrateWithAI(productName, productDescription, niche, tone = 'informatif') {
+  const hook = extractHook(productName, productDescription, niche);
+
+  if (!llm.isConfigured()) {
+    // Fallback templates
+    return orchestrate(productName, productDescription, niche, tone);
+  }
+
+  const userPrompt = `Produit : ${productName}
+Description : ${productDescription || 'Pas de description'}
+Niche : ${niche || 'Tech/SaaS'}
+Ton : ${tone}
+Hook de départ : "${hook.text}"
+
+Génère le contenu en te basant sur ce hook.`;
+
+  try {
+    const [threadContent, linkedinContent, shortContent] = await Promise.all([
+      llm.generate(llm.SYSTEM_PROMPTS.thread, userPrompt),
+      llm.generate(llm.SYSTEM_PROMPTS.linkedin, userPrompt),
+      llm.generate(llm.SYSTEM_PROMPTS.short, userPrompt),
+    ]);
+
+    return {
+      hook,
+      llmGenerated: true,
+      outputs: {
+        thread: {
+          id: uuid(),
+          hookId: hook.id,
+          format: 'thread',
+          tone,
+          platform: 'twitter',
+          content: threadContent || generateThread(hook, productName, niche, tone).content,
+          structure: ['hook', 'problem', 'agitation', 'solution', 'proof', 'cta'],
+        },
+        linkedin: {
+          id: uuid(),
+          hookId: hook.id,
+          format: 'linkedin_post',
+          tone,
+          platform: 'linkedin',
+          content: linkedinContent || generateLinkedInPost(hook, productName, niche, tone).content,
+          structure: ['hook', 'story', 'insight', 'solution', 'cta'],
+        },
+        short: {
+          id: uuid(),
+          hookId: hook.id,
+          format: 'short_script',
+          tone,
+          platform: 'youtube',
+          content: shortContent || generateShortContent(hook, productName, niche, tone).content,
+          structure: ['hook_visual', 'problem_demo', 'solution_demo', 'result', 'cta_overlay'],
+        },
+      },
+    };
+  } catch (err) {
+    console.error('LLM error, fallback templates:', err.message);
+    return {
+      ...orchestrate(productName, productDescription, niche, tone),
+      llmError: err.message,
+    };
+  }
 }

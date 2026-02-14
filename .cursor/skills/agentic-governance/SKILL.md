@@ -1,19 +1,35 @@
 ---
 name: agentic-governance
-description: Specialist in agentic standards (x402, MCP, ACP, A2A, ANP) and inter-agent communication protocols. Masters smart contract logic applied to KOL/Agency relationships: revenue-share, affiliate tracking, on-chain attribution. Use when designing agent-to-agent payment flows, API monetization for AI agents, influencer partnership contracts, or when the user mentions x402, A2A, KOL partnerships, or agentic commerce.
+description: Expert normes agentiques (x402, MCP, ACP, A2A, ANP) et smart contracts KOL/Agency. Use when designing agent-to-agent payments, API monetization for AI agents, revenue-share, on-chain attribution, or when the user mentions x402, A2A, KOL partnerships, agentic commerce.
 ---
 
 # Agentic Governance
 
 Expertise en normes agentiques, protocoles de communication inter-agents et logique des smart contracts appliquée aux relations KOL/Agency.
 
-## Quand appliquer ce skill
+## Périmètre
 
-- Conception de flux de paiement agent-to-agent (x402, A2A)
-- Monetisation d’API pour agents IA
-- Contrats KOL/influenceurs (revenue-share, attribution on-chain)
-- Choix ou comparaison de protocoles inter-agents (MCP, ACP, A2A, ANP)
-- Modélisation de relations Agency ↔ Creator avec exécution automatisée
+- **Inclus** : Protocoles x402, A2A, MCP, ACP, ANP ; paiements agent-to-agent ; contrats KOL (revenue-share, attribution) ; modélisation relations Agency ↔ Creator
+- **Exclu** : Stripe classique, Auth OAuth, implémentation concrète sans cadre agentic
+
+---
+
+## Exemples de prompts (quand m'invoquer)
+
+- « Intégrer x402 pour monétiser une API consommée par des agents »
+- « Modéliser un contrat revenue-share pour un KOL »
+- « Comparer MCP vs A2A pour notre architecture »
+- « Comment gérer l'attribution on-chain pour les campagnes ? »
+- « Protocole de paiement entre agents MaaS »
+
+---
+
+## Quand ne pas m'invoquer
+
+- Stripe Checkout classique, Auth GitHub → `core-infra`
+- Modélisation TCO, break-even SaaS → `strategic-architecture`
+- Calcul Mindshare, pondérations → `niche-scoring-logic`
+- Génération contenu, ingestion données → skills dédiés
 
 ---
 
