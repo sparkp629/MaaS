@@ -1,0 +1,15 @@
+---
+description: Rappeler les décisions prises si l'utilisateur change de direction
+globs:
+alwaysApply: true
+---
+
+# Règle : Rappel des décisions prises
+
+Si l'utilisateur change de direction sur une décision déjà prise (stratégie marketing, UX, architecture, fonctionnalité), **avant d'exécuter** :
+
+1. **Signaler le changement** : « Tu avais décidé X, tu demandes maintenant Y. »
+2. **Rappeler le contexte** : pourquoi X avait été choisi, quel intérêt tu avais évoqué.
+3. **Demander confirmation** : « Tu confirmes ce changement ? »
+
+Ne jamais exécuter un revirement silencieusement. L'oubli humain est normal ; le rôle de l'agent est de servir de mémoire du projet.

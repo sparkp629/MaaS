@@ -1,65 +1,71 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import Home from './pages/Home';
+import LayoutDashboard from './components/LayoutDashboard';
+import LayoutLogin from './components/LayoutLogin';
+import HomeLogin from './pages/HomeLogin';
 import Dashboard from './pages/Dashboard';
 import CampaignEngine from './pages/CampaignEngine';
 import Checkout from './pages/Checkout';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import LoginGate from './pages/LoginGate';
+import Onboarding from './pages/Onboarding';
+import { useAuth } from './context/AuthContext';
 
-const STRATEGY = import.meta.env.VITE_STRATEGY || 'default';
+/**
+ * Architecture hybride :
+ * - Non connecté → Landing conversion (login-first)
+ * - Connecté sans onboarding → Onboarding obligatoire (7 questions)
+ * - Connecté + onboarding fait → Dashboard sidebar (dashboard-first)
+ */
 
-export default function App() {
-  if (STRATEGY === 'dashboard-first') {
-    return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Navigate to="/" replace />} />
-            <Route path="campaign" element={<CampaignEngine />} />
-            <Route path="checkout" element={<Checkout />} />
-            <Route path="checkout/success" element={<CheckoutSuccess />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    );
+function AppRoutes() {
+  const { isLoggedIn } = useAuth();
+  const [onboarded, setOnboarded] = useState(() => {
+    try { return localStorage.getItem('maas_onboarded') === 'true'; } catch { return false; }
+  });
+
+  function handleOnboardingComplete(answers) {
+    try { localStorage.setItem('maas_onboarded', 'true'); localStorage.setItem('maas_onboarding', JSON.stringify(answers)); } catch {}
+    setOnboarded(true);
   }
 
-  if (STRATEGY === 'login-first') {
-    return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route
-              path="dashboard"
-              element={
-                <LoginGate>
-                  <Dashboard />
-                </LoginGate>
-              }
-            />
-            <Route path="campaign" element={<CampaignEngine />} />
-            <Route path="checkout" element={<Checkout />} />
-            <Route path="checkout/success" element={<CheckoutSuccess />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    );
+  // Connecté mais pas onboardé → onboarding obligatoire
+  if (isLoggedIn && !onboarded) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  return (
-    <BrowserRouter>
+  // Connecté + onboardé → Dashboard sidebar
+  if (isLoggedIn) {
+    return (
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="campaign" element={<CampaignEngine />} />
+        <Route path="/" element={<LayoutDashboard />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Navigate to="/" replace />} />
+          <Route path="competitors" element={<CampaignEngine />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="checkout/success" element={<CheckoutSuccess />} />
         </Route>
       </Routes>
+    );
+  }
+
+  // Non connecté → Landing conversion
+  return (
+    <Routes>
+      <Route path="/" element={<LayoutLogin />}>
+        <Route index element={<HomeLogin />} />
+        <Route path="checkout" element={<Checkout />} />
+        <Route path="checkout/success" element={<CheckoutSuccess />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   );
 }
