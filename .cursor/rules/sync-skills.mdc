@@ -1,0 +1,23 @@
+---
+description: Synchroniser les skills du projet vers le profil Cursor global
+globs:
+alwaysApply: false
+---
+
+# Règle : Synchronisation des skills
+
+Les skills définis dans `.cursor/skills/` de ce projet doivent être accessibles globalement dans Cursor.
+
+## Commande de synchronisation
+
+```powershell
+npm run sync-skills
+```
+
+Cela copie tous les dossiers de `.cursor/skills/` vers `%USERPROFILE%\.cursor\skills\`.
+
+## Quand synchroniser
+
+- Après avoir créé ou modifié un skill
+- Après un `git pull` qui inclut des changements de skills
+- Au premier clone du projet sur une nouvelle machine

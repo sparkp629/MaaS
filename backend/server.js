@@ -18,6 +18,14 @@ app.use('/api', apiRouter);
 
 app.get('/health', (_, res) => res.json({ ok: true }));
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`MaaS API http://localhost:${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} already in use. Kill the old process or change PORT in .env`);
+    process.exit(1);
+  }
+  throw err;
 });

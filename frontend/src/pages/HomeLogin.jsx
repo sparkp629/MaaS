@@ -4,8 +4,6 @@
  */
 import { Github, CheckCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 
 const FEATURES = [
   'Matching KOLs par score de conversion réel',
@@ -16,12 +14,9 @@ const FEATURES = [
 ];
 
 export default function HomeLogin() {
-  const { login, isLoggedIn } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isLoggedIn) navigate('/dashboard', { replace: true });
-  }, [isLoggedIn, navigate]);
+  const { login } = useAuth();
+  // Pas de navigate ici — AppRoutes gère automatiquement le swap
+  // quand isLoggedIn passe à true
 
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center px-6">

@@ -19,10 +19,19 @@ import { useAuth } from './context/AuthContext';
  */
 
 function AppRoutes() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
   const [onboarded, setOnboarded] = useState(() => {
     try { return localStorage.getItem('maas_onboarded') === 'true'; } catch { return false; }
   });
+
+  // Attendre que l'auth soit initialisée avant d'afficher quoi que ce soit
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-slate-500 text-sm">Loading...</div>
+      </div>
+    );
+  }
 
   function handleOnboardingComplete(answers) {
     try { localStorage.setItem('maas_onboarded', 'true'); localStorage.setItem('maas_onboarding', JSON.stringify(answers)); } catch {}
