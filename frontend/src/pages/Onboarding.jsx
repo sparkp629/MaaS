@@ -18,6 +18,7 @@ const STEPS = [
   {
     title: 'Tell us about your product',
     subtitle: 'This is your first request. You can change everything later.',
+    greeting: 'Let\'s be partners in crime.',
     questions: [
       {
         id: 'product_name',
@@ -41,6 +42,7 @@ const STEPS = [
   {
     title: 'Your goals & platforms',
     subtitle: 'We will tailor your dashboard and KOL matching accordingly.',
+    greeting: 'We are on the same team.',
     questions: [
       {
         id: 'goals',
@@ -70,6 +72,7 @@ const STEPS = [
   {
     title: 'Your audience & competitors',
     subtitle: 'We will analyze their weaknesses and your opportunities.',
+    greeting: 'Knowledge is power.',
     questions: [
       {
         id: 'audience_size',
@@ -93,6 +96,7 @@ const STEPS = [
   {
     title: 'Your content approach',
     subtitle: 'This helps us calibrate the AI suggestions for you.',
+    greeting: 'Almost there. You are doing great.',
     questions: [
       {
         id: 'content_approach',
@@ -256,7 +260,10 @@ export default function Onboarding({ onComplete }) {
           />
         </div>
 
-        {/* Step title */}
+        {/* Greeting + Step title */}
+        {current.greeting && (
+          <p className="text-indigo-400 text-sm font-medium mb-3">{current.greeting}</p>
+        )}
         <h2 className="text-2xl font-bold text-white mb-1">{current.title}</h2>
         <p className="text-slate-400 text-sm mb-6">{current.subtitle}</p>
 
