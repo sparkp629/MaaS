@@ -40,16 +40,16 @@ function AppRoutes() {
 
   // Connecté mais pas onboardé → onboarding obligatoire
   if (isLoggedIn && !onboarded) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
+    return <Onboarding key="onboarding" onComplete={handleOnboardingComplete} />;
   }
 
-  // Connecté + onboardé → Dashboard sidebar
+  // Connecté + onboardé → Dashboard sidebar (URL /app pour forcer le bon écran)
   if (isLoggedIn) {
     return (
-      <Routes>
-        <Route path="/" element={<LayoutDashboard />}>
+      <Routes key="dashboard">
+        <Route path="/" element={<Navigate to="/app" replace />} />
+        <Route path="/app" element={<LayoutDashboard />}>
           <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Navigate to="/" replace />} />
           <Route path="competitors" element={<CampaignEngine />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="checkout/success" element={<CheckoutSuccess />} />
@@ -60,7 +60,7 @@ function AppRoutes() {
 
   // Non connecté → Landing conversion
   return (
-    <Routes>
+    <Routes key="landing">
       <Route path="/" element={<LayoutLogin />}>
         <Route index element={<HomeLogin />} />
         <Route path="checkout" element={<Checkout />} />

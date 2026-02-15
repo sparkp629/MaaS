@@ -1,70 +1,37 @@
-# Sondages MaaS — 3 exemples complets par approche stratégique
+# Sondages MaaS — Sondage unique condensé
 
-Chaque sondage est adapté à l’approche (default, dashboard-first, login-first) et combine questions **fermées** (O/N, choix) et **ouvertes** pour qualifier le besoin et orienter la promesse de valeur.
-
----
-
-## Sondage 1 — Approche DEFAULT (Home + Dashboard séparé)
-
-**Contexte** : L’utilisateur découvre MaaS via la landing et peut aller au Dashboard sans se connecter. Le sondage sert à qualifier avant de lui proposer le Magic Button.
-
-| # | Question | Type | Objectif |
-|---|----------|------|----------|
-| 1 | Quel est le nom de votre produit Micro-SaaS ? | Ouverte | Identifier le produit |
-| 2 | Dans quelle niche technique vous positionnez-vous ? (Dev Tools, No-code, API-first, CRM, Analytics, Autre) | Fermée ( choix multiple) | Aligner avec les KOLs disponibles |
-| 3 | Combien de campagnes de contenu avez-vous déjà lancées avec des influenceurs ou KOLs ? (0 / 1-3 / 4-10 / +10) | Fermée | Mesurer le niveau de maturité |
-| 4 | Quel est aujourd’hui votre plus gros blocage pour mesurer le ROI de vos campagnes ? (Métriques vanité uniquement / Pas de suivi conversion / Manque de transparence des KOLs / Autre) | Fermée | Cadrer la promesse (suivi ROI) |
-| 5 | Quel canal priorisez-vous pour votre prochaine campagne ? (X/Twitter, LinkedIn, YouTube, Newsletter, Indifférent) | Fermée | Préparer le Matching et l’orchestration |
-| 6 | Décrivez en une phrase l’objectif principal de votre prochaine campagne (visibilité, leads, conversions, notoriété). | Ouverte | Adapter le contenu et les KOLs |
-| 7 | Souhaitez-vous recevoir une proposition personnalisée (Magic Button : audit + première campagne) ? (Oui / Non / Plus tard) | Fermée | Qualifier l’intention d’achat |
+Un seul sondage est utilisé en onboarding : **7 questions en 4 étapes**. Toutes les questions sont **les plus directes possibles** (ex. « Niche : », « Product or project name : »). Il fusionne les questions les plus pertinentes des trois modèles initiaux.
 
 ---
 
-## Sondage 2 — Approche DASHBOARD-FIRST
+## Sondage unique (implémenté dans `Onboarding.jsx`)
 
-**Contexte** : L’utilisateur voit directement le Dashboard. Le sondage apparaît comme un bloc optionnel (« Améliorez vos résultats ») pour affiner les recommandations sans bloquer l’accès.
-
-| # | Question | Type | Objectif |
-|---|----------|------|----------|
-| 1 | Votre produit ou service en une phrase : | Ouverte | Contexte produit |
-| 2 | Votre budget pour une première campagne de contenu KOL ? ( &lt; 500 € / 500–2000 € / 2000–5000 € / &gt; 5000 €) | Fermée | Aligner les KOLs sur le budget |
-| 3 | Quelles métriques souhaitez-vous suivre en priorité ? (Clics / Conversions / Sign-ups / Mindshare Index / Toutes) | Fermée | Personnaliser les tableaux du Dashboard |
-| 4 | Avez-vous déjà identifié des KOLs potentiels ? (Oui, une liste / Quelques noms / Non) | Fermée | Adapter le Discovery |
-| 5 | Quel format de contenu vous intéresse le plus ? (Thread X, Post LinkedIn, Short vidéo, Newsletter, Plusieurs) | Fermée | Orienter le moteur de campagne |
-| 6 | Qu’attendez-vous en priorité de MaaS ? (Matching KOLs / Génération de contenu / Suivi ROI / Tout) | Fermée | Renforcer la promesse affichée |
-| 7 | Un détail supplémentaire qui nous aiderait à affiner vos recommandations : | Ouverte | Informations qualitatives |
+| Étape | # | Question | Type | Objectif |
+|-------|---|----------|------|----------|
+| 1 | 1 | **Niche** | Fermée (choix unique) | Aligner avec les KOLs disponibles |
+| 1 | 2 | **Product or project name** | Ouverte | Identifier le produit |
+| 2 | 3 | **Your biggest difficulty right now?** (Lack of visibility / Not sure what content to post / Not sure which KOLs to contact / Measuring campaign ROI / Other) | Fermée | Faire percevoir au prospect qu’on connaît ses problèmes (visibilité, contenu, KOL, ROI) |
+| 2 | 4 | **Biggest blockage to measure campaign ROI?** (Vanity metrics only / No conversion tracking / Lack of KOL transparency / Other) | Fermée | Cadrer la promesse (suivi ROI) |
+| 3 | 5 | **Priority channel for your next campaign?** (X, LinkedIn, YouTube, Newsletter, No preference) | Fermée | Préparer le matching et l’orchestration |
+| 3 | 6 | **Main goal of your next campaign (one sentence)** | Ouverte | Adapter le contenu et les KOLs |
+| 4 | 7 | **Would you like a personalized proposal (audit + first campaign)?** (Yes / No / Later) | Fermée | Qualifier l’intention d’achat |
 
 ---
 
-## Sondage 3 — Approche LOGIN-FIRST
+## Ce qui a été écarté ou reporté
 
-**Contexte** : L’utilisateur doit se connecter pour accéder au Dashboard. Le sondage peut être proposé avant ou juste après la connexion, pour personnaliser l’expérience et rassurer sur la valeur.
-
-| # | Question | Type | Objectif |
-|---|----------|------|----------|
-| 1 | Pourquoi vous connectez-vous à MaaS aujourd’hui ? (Découvrir des KOLs / Générer du contenu / Suivre le ROI de campagnes / Explorer) | Fermée | Comprendre l’intention principale |
-| 2 | Nom de votre produit ou société : | Ouverte | Contexte |
-| 3 | Votre niche principale : (Dev Tools / No-code / API-first / CRM / Analytics / Autre) | Fermée | Matching |
-| 4 | Êtes-vous fondateur, en agence, ou les deux ? | Fermée | Adapter le parcours et le langage |
-| 5 | Quelle est votre plus grande frustration avec le marketing influence actuel ? | Ouverte | Cibler la promesse (vanité, transparence, ROI) |
-| 6 | Souhaitez-vous que nous vous contactions pour un audit personnalisé ? (Oui / Non) | Fermée | Qualifier la vente (Magic Button) |
-| 7 | Si oui, quel canal préférez-vous pour être recontacté ? (Email / LinkedIn / X) | Fermée (conditionnelle) | Préparer la prise de contact |
+- **Sondage 1** : les 3 premières questions (nom produit long, niche en phrase, nombre de campagnes) étaient jugées peu directes ; remplacées par Niche + Product name en style direct.
+- **Sondage 2** : la question 1 (« Votre produit ou service en une phrase ») écartée ; les Q2–6 sont reflétées dans le condensé (budget, métriques, KOLs, format, attente peuvent être réintroduites plus tard si besoin). La **Q7** (« Un détail supplémentaire qui nous aiderait à affiner… ») : l’idée de l’ouvrir dans une **popup au mouvement du curseur vers le haut** a été jugée incertaine (on ne connaît pas l’intention de l’internaute). Elle peut être ajoutée plus tard comme **champ optionnel** en fin de sondage, sans popup.
+- **Sondage 3** : aucune question reprise dans le condensé.
 
 ---
 
-## Synthèse — Choix questions ouvertes vs fermées
+## Bénéfice KOL et part des gains
 
-| Objectif | Type recommandé | Exemple |
-|----------|-----------------|---------|
-| Qualification rapide, tri | Fermée | Niche, budget, canal |
-| Contexte produit, objectifs | Ouverte courte | « En une phrase », « Décrivez l’objectif » |
-| Compréhension fine du besoin | Mixte | Fermée + ouverte optionnelle |
-| Intention d’achat | Fermée | Oui / Non / Plus tard |
+Pour la proposition de valeur envers les influenceurs (gains, part de revenus, illustration des parts entre MaaS et KOL), voir **`docs/DEALS_KOL_PROPOSITION_MAAS.md`**.
 
 ---
 
-## Intégration suggérée
+## Intégration
 
-- **Default** : modal ou page « Avant d’accéder au Magic Button » après clic sur CTA.
-- **Dashboard-first** : bloc « Affiner mes recommandations » dans le Dashboard.
-- **Login-first** : étape après connexion ou écran intermédiaire avant le Dashboard.
+- **Login-first (actuel)** : le sondage s’affiche après le clic sur le CTA de la landing, avant l’accès au dashboard. Les réponses alimentent les données du dashboard (voir `docs/ONBOARDING_TO_DASHBOARD_REMINDER.md`).

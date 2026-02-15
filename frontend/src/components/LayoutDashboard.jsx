@@ -7,8 +7,8 @@ import { BarChart3, Search, LogOut, Github, LayoutDashboard as DashIcon } from '
 import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
-  { to: '/', icon: DashIcon, label: 'Dashboard' },
-  { to: '/competitors', icon: Search, label: 'Competitor Search' },
+  { to: '/app', icon: DashIcon, label: 'Dashboard' },
+  { to: '/app/competitors', icon: Search, label: 'Competitor Search' },
 ];
 
 export default function LayoutDashboard() {
@@ -28,7 +28,7 @@ export default function LayoutDashboard() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
+              end={item.to === '/app'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive

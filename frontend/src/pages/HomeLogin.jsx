@@ -3,6 +3,7 @@
  * Pas de "connexion" visible : le bouton invite a decouvrir, pas a s'identifier
  */
 import { CheckCircle, ArrowRight, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const FEATURES = [
@@ -14,7 +15,12 @@ const FEATURES = [
 ];
 
 export default function HomeLogin() {
+  const navigate = useNavigate();
   const { login } = useAuth();
+
+  const handleCta = () => {
+    login('github').then(() => navigate('/app', { replace: true }));
+  };
 
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center px-6">
@@ -37,7 +43,7 @@ export default function HomeLogin() {
 
       {/* CTA principal — pas de mention "connexion", invite a decouvrir */}
       <button
-        onClick={() => login('github')}
+        onClick={handleCta}
         className="flex items-center gap-3 px-8 py-4 bg-indigo-500 hover:bg-indigo-600 rounded-2xl text-white font-semibold text-lg shadow-xl shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 hover:scale-[1.02] mb-12"
       >
         <Zap className="w-5 h-5" />

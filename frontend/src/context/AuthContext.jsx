@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, flushSync } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const STORAGE_KEY = 'maas_user';
@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
         avatar: null,
         provider,
       };
-      setUser(mockUser);
+      flushSync(() => setUser(mockUser));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
     }
   };

@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "npx concurrently -n api,app -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "start": "npx kill-port 3001 5173 5174 2>nul & npm run dev",
     "dev:api": "npm run dev --prefix backend",
     "dev:app": "npm run dev --prefix frontend",
     "sync-skills": "xcopy /E /I /Y \".cursor\\skills\" \"%USERPROFILE%\\.cursor\\skills\""

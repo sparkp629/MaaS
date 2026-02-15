@@ -8,106 +8,95 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 /**
- * 4 steps, 7 questions total:
- * Step 1: Product name + Industry (2 questions)
- * Step 2: Goals + Platforms (2 questions)
- * Step 3: Audience size + Competitors (2 questions)
- * Step 4: Content approach (1 question)
+ * Sondage unique condensé — 7 questions, 4 étapes.
+ * Questions les plus directes possibles (ex. "Niche:", "Product name:").
+ * Fusion des meilleures questions des 3 modèles (S1 Q4–7, S2 Q2–7 sans Q1).
  */
 const STEPS = [
   {
-    title: 'Tell us about your product',
-    subtitle: 'This is your first request. You can change everything later.',
-    greeting: 'Let\'s be partners in crime.',
+    title: 'Context',
+    subtitle: 'Two quick fields.',
+    greeting: "Let's be partners in crime.",
     questions: [
+      {
+        id: 'niche',
+        label: 'Niche',
+        type: 'single',
+        options: [
+          'Dev Tools', 'No-code / Low-code', 'API-first SaaS', 'CRM & Sales',
+          'Analytics & Data', 'E-commerce', 'EdTech', 'FinTech', 'AI / ML',
+          'Productivity', 'Other',
+        ],
+      },
       {
         id: 'product_name',
         label: 'Product or project name',
         type: 'open',
-        placeholder: 'e.g. ShipFast, Plausible, Resend...',
-      },
-      {
-        id: 'industry',
-        label: 'Industry',
-        type: 'single',
-        options: [
-          'Dev Tools', 'No-code / Low-code', 'API-first SaaS', 'CRM & Sales',
-          'Analytics & Data', 'E-commerce', 'Education & EdTech',
-          'Health & Wellness', 'Finance & FinTech', 'AI & Machine Learning',
-          'Productivity', 'Other',
-        ],
+        placeholder: 'e.g. ShipFast, Plausible, Resend',
       },
     ],
   },
   {
-    title: 'Your goals & platforms',
-    subtitle: 'We will tailor your dashboard and KOL matching accordingly.',
+    title: 'Your situation',
+    subtitle: 'So we can match the right solution.',
     greeting: 'We are on the same team.',
     questions: [
       {
-        id: 'goals',
-        label: 'Main business goals',
-        type: 'multi',
+        id: 'biggest_difficulty',
+        label: 'Your biggest difficulty right now?',
+        type: 'single',
         options: [
-          'Increase conversions',
-          'Grow my audience',
-          'Improve brand awareness',
-          'Generate qualified leads',
-          'Track ROI on marketing spend',
-          'Understand my competitors',
-          'Not sure yet',
+          'Lack of visibility',
+          'Not sure what content to post',
+          'Not sure which KOLs to contact',
+          'Measuring campaign ROI',
+          'Other',
         ],
       },
       {
-        id: 'platforms',
-        label: 'Platforms you publish on',
-        type: 'multi',
+        id: 'roi_blockage',
+        label: 'Biggest blockage to measure campaign ROI?',
+        type: 'single',
         options: [
-          'X (Twitter)', 'LinkedIn', 'YouTube', 'TikTok',
-          'Instagram', 'Newsletter', 'Blog / Website', 'None yet',
+          'Vanity metrics only',
+          'No conversion tracking',
+          'Lack of KOL transparency',
+          'Other',
         ],
       },
     ],
   },
   {
-    title: 'Your audience & competitors',
-    subtitle: 'We will analyze their weaknesses and your opportunities.',
+    title: 'Next campaign',
+    subtitle: 'We will tailor matching and content.',
     greeting: 'Knowledge is power.',
     questions: [
       {
-        id: 'audience_size',
-        label: 'Current audience size (all platforms)',
+        id: 'priority_channel',
+        label: 'Priority channel for your next campaign?',
         type: 'single',
         options: [
-          'Just starting (0 - 1K)',
-          'Growing (1K - 10K)',
-          'Established (10K - 50K)',
-          'Large (50K+)',
+          'X (Twitter)', 'LinkedIn', 'YouTube', 'Newsletter', 'No preference',
         ],
       },
       {
-        id: 'competitors',
-        label: 'Name up to 3 competitors or similar products',
+        id: 'campaign_goal',
+        label: 'Main goal of your next campaign (one sentence)',
         type: 'open',
-        placeholder: 'e.g. Hootsuite, Buffer, Sprout Social',
+        placeholder: 'e.g. visibility, leads, conversions, awareness',
       },
     ],
   },
   {
-    title: 'Your content approach',
-    subtitle: 'This helps us calibrate the AI suggestions for you.',
+    title: 'Next step',
+    subtitle: 'Optional: we can send a personalized proposal.',
     greeting: 'Almost there. You are doing great.',
     questions: [
       {
-        id: 'content_approach',
-        label: 'How do you create content today?',
+        id: 'personalized_proposal',
+        label: 'Would you like a personalized proposal (audit + first campaign)?',
         type: 'single',
-        options: [
-          'I create everything manually',
-          'I use some automation tools (Make, Zapier...)',
-          'I have a team handling content',
-          'I have not started creating content yet',
-        ],
+        options: ['Yes', 'No', 'Later'],
       },
     ],
   },
