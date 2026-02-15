@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import CampaignEngine from './pages/CampaignEngine';
 import Checkout from './pages/Checkout';
 import CheckoutSuccess from './pages/CheckoutSuccess';
+import PaymentTab from './pages/PaymentTab';
 import LoginGate from './pages/LoginGate';
 import Onboarding from './pages/Onboarding';
 import { useAuth } from './context/AuthContext';
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="/app" element={<LayoutDashboard />}>
           <Route index element={<Dashboard />} />
           <Route path="competitors" element={<CampaignEngine />} />
+          <Route path="payment" element={<PaymentTab />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="checkout/success" element={<CheckoutSuccess />} />
         </Route>

@@ -210,8 +210,8 @@ function KOLCard({ kol, activeNetwork }) {
         {/* Right: network content preview (enlarged) */}
         <div className="w-[400px] shrink-0">
           {networkContent || (
-            <div className="h-full flex items-center justify-center text-slate-600 text-sm p-4 border border-dashed border-slate-700/50 rounded-xl">
-              No content for this network
+            <div className="h-full flex items-center justify-center text-slate-500 text-sm p-4 border border-dashed border-slate-700/50 rounded-xl">
+              Coming soon
             </div>
           )}
         </div>
@@ -281,7 +281,7 @@ function IntelligenceSection({ segments, competitors, roi, period }) {
               })}
             </div>
           ) : (
-            <p className="text-slate-500 text-sm">Complete the onboarding to see competitor analysis.</p>
+            <p className="text-slate-500 text-sm">Coming soon</p>
           )}
         </div>
       </div>
@@ -361,7 +361,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="text-slate-500 text-sm p-6 text-center border border-dashed border-slate-700/50 rounded-xl">
-          No KOLs tracked yet. Add KOLs via the API to start tracking.
+          Coming soon
         </div>
       )}
 

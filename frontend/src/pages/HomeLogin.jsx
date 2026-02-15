@@ -1,8 +1,8 @@
 /**
- * Landing page — lecture du slogan + CTA direct vers le dashboard
+ * Landing page — slogan + CTA direct vers le dashboard
  * Pas de "connexion" visible : le bouton invite a decouvrir, pas a s'identifier
  */
-import { CheckCircle, ArrowRight, Zap } from 'lucide-react';
+import { CheckCircle, ArrowRight, Zap, Copy, TrendingUp, Target, Calendar, Handshake } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,6 +12,15 @@ const FEATURES = [
   'Premiere campagne cle en main (X Thread, LinkedIn, Short)',
   'Suivi ROI et attribution en temps reel',
   'Intelligence concurrentielle automatisee',
+];
+
+/** Icônes évocatrices : contenu qui marche, canal, cible, planification, deals KOL */
+const LANDING_ICONS = [
+  { icon: Copy, label: 'Contenus à fort engagement' },
+  { icon: TrendingUp, label: 'Ce qui marche dans votre niche' },
+  { icon: Target, label: 'Sujet + canal clés en main' },
+  { icon: Calendar, label: 'Génération IA et planification' },
+  { icon: Handshake, label: 'Deals KOL déjà bookés' },
 ];
 
 export default function HomeLogin() {
@@ -36,10 +45,28 @@ export default function HomeLogin() {
         <span className="text-indigo-400">On vous montre laquelle.</span>
       </h1>
 
-      <p className="text-slate-400 text-lg text-center max-w-xl mb-10">
+      <p className="text-slate-400 text-lg text-center max-w-xl mb-6">
         MaaS analyse votre niche, identifie les KOLs qui convertissent vraiment,
         et vous donne un plan d'action concret en quelques minutes.
       </p>
+
+      {/* Second slogan — faire comme la concurrence */}
+      <p className="text-slate-300/90 text-base text-center max-w-2xl mb-10 italic">
+        Le but n'est pas de se démarquer, le but serait paradoxalement de faire comme la concurrence.
+        Incongru mais réaliste : on ne réinvente pas un truc qui marche, on vous montre ce qui marche.
+      </p>
+
+      {/* Icônes évocatrices */}
+      <div className="flex flex-wrap justify-center gap-6 mb-10">
+        {LANDING_ICONS.map(({ icon: Icon, label }) => (
+          <div key={label} className="flex flex-col items-center gap-2 text-slate-400 hover:text-indigo-300 transition-colors">
+            <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-600/40">
+              <Icon className="w-5 h-5" />
+            </div>
+            <span className="text-xs text-center max-w-[100px]">{label}</span>
+          </div>
+        ))}
+      </div>
 
       {/* CTA principal — pas de mention "connexion", invite a decouvrir */}
       <button

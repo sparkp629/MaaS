@@ -11,18 +11,25 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (isSupabaseConfigured() && supabase) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            name: session.user.user_metadata?.user_name || session.user.email,
-            email: session.user.email,
-            avatar: session.user.user_metadata?.avatar_url,
-            provider: session.user.app_metadata?.provider,
-          });
-        }
-        setLoading(false);
-      });
+      const done = () => setLoading(false);
+      // Timeout de secours : si getSession bloque (réseau, CORS, etc.), afficher la landing au plus tard après 3s
+      const t = setTimeout(done, 3000);
+      supabase.auth
+        .getSession()
+        .then(({ data: { session } }) => {
+          if (session?.user) {
+            setUser({
+              id: session.user.id,
+              name: session.user.user_metadata?.user_name || session.user.email,
+              email: session.user.email,
+              avatar: session.user.user_metadata?.avatar_url,
+              provider: session.user.app_metadata?.provider,
+            });
+          }
+          done();
+        })
+        .catch(done)
+        .finally(() => clearTimeout(t));
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {

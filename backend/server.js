@@ -19,7 +19,7 @@ app.use('/api', apiRouter);
 app.get('/health', (_, res) => res.json({ ok: true }));
 
 const server = app.listen(PORT, () => {
-  console.log(`MaaS API http://localhost:${PORT}`);
+  console.log(`[MaaS Backend] OK — listening on port ${PORT}`);
 });
 
 server.on('error', (err) => {
