@@ -6,6 +6,8 @@
     "start": "npx kill-port 3001 5173 5174 2>nul & npm run dev",
     "dev:api": "npm run dev --prefix backend",
     "dev:app": "npm run dev --prefix frontend",
+    "test:lifecycle": "node scripts/test-lifecycle.mjs",
+    "test:prepush": "npm run test:lifecycle",
     "sync-skills": "xcopy /E /I /Y \".cursor\\skills\" \"%USERPROFILE%\\.cursor\\skills\""
   },
   "devDependencies": {
