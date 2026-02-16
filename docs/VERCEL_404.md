@@ -1,10 +1,14 @@
-# Si le site https://maa-s.vercel.app affiche encore une erreur 404
+# Si le domaine Vercel affiche un mauvais `index.html` ou une 404
 
-La config du projet est prête. Si après un nouveau déploiement la page reste 404 :
+Le repo est configure pour builder depuis la racine via `vercel.json`.
 
-1. Ouvre ton projet sur Vercel (onglet **Settings**).
-2. Trouve le champ **Root Directory**.
-3. Clique sur **Edit**, mets : **frontend** (sans slash), puis enregistre.
-4. Redéploie (onglet Deployments → les trois points sur le dernier déploiement → Redeploy).
+## Verification unique a faire dans Vercel
 
-Ensuite réessaie d’ouvrir http://maa-s-git-main-sparkp629s-projects.vercel.app/
+1. Ouvre le projet Vercel > **Settings** > **General**.
+2. Verifie **Root Directory** : il doit etre vide (racine du repo), **pas** `frontend` et surtout **pas** `frontend/src`.
+3. Redeploie le dernier build (**Deployments** > menu du dernier deploy > **Redeploy**).
+
+## Pourquoi
+
+- Le `vercel.json` racine lance `npm run build --prefix frontend` et publie `frontend/dist`.
+- Si le Root Directory pointe sur un sous-dossier, Vercel peut ignorer cette config et servir une mauvaise entree.

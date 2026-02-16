@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Users, TrendingUp, TrendingDown, ExternalLink, Sparkles, Lock, ChevronDown, Eye, MousePointerClick, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Users, ExternalLink, Sparkles, Lock, ChevronDown, Eye, MousePointerClick, ArrowUpRight, ArrowDownRight, Lightbulb, Megaphone, CalendarClock } from 'lucide-react';
 import { api } from '../api';
-import { useAuth } from '../context/AuthContext';
 import NetworkIcon, { NETWORKS } from '../components/NetworkIcons';
 import MindshareGauge from '../components/MindshareGauge';
 
@@ -90,6 +89,168 @@ function NetworkFilters({ active, onChange }) {
           <NetworkIcon network={n} size="md" />
         </button>
       ))}
+    </div>
+  );
+}
+
+function getChannelStatus(apiStatus, network) {
+  const mapping = {
+    twitter: apiStatus?.x,
+    youtube: apiStatus?.youtube,
+    linkedin: apiStatus?.linkedin,
+    newsletter: true,
+    tiktok: apiStatus?.tiktok,
+    instagram: apiStatus?.meta,
+  };
+  return Boolean(mapping[network]);
+}
+
+function buildInsights(kols, apiStatus) {
+  const networkWeights = { twitter: 3, youtube: 4, linkedin: 2 };
+  const opportunities = [];
+
+  (kols || []).forEach((kol) => {
+    const previews = kol.previews || {};
+    ['twitter', 'youtube', 'linkedin'].forEach((network) => {
+      if (!previews[network]) return;
+      const scoreBase = (kol.conversionScore || 0) * 0.6 + (kol.mindshareIndex || 0) * 0.4;
+      opportunities.push({
+        id: `${kol.id}-${network}`,
+        network,
+        available: getChannelStatus(apiStatus, network),
+        kolName: kol.displayName,
+        niche: kol.niche,
+        score: Math.round(scoreBase + (networkWeights[network] || 0)),
+        text: previews[network].text || `${kol.displayName} • ${kol.niche}`,
+      });
+    });
+  });
+
+  const ranked = opportunities.sort((a, b) => b.score - a.score);
+  const best = ranked[0] || null;
+  const bestAvailable = ranked.find((item) => item.available) || null;
+  const channel = bestAvailable?.network || best?.network || 'newsletter';
+  const topicFromText = best?.text?.split(/[.!?]/)?.[0]?.trim();
+
+  const nextActionByChannel = {
+    twitter: 'Publier un thread preuve sociale + CTA démo sous 48h.',
+    youtube: 'Publier une vidéo courte orientée cas client cette semaine.',
+    linkedin: 'Publier un post expert + preuve chiffrée avant fin de semaine.',
+    newsletter: 'Envoyer un email “avant/après levée” avec un CTA audit.',
+  };
+
+  return {
+    topContents: ranked.slice(0, 5),
+    actionPlan: {
+      subject: topicFromText || 'Angle fondateur + preuve de traction avant/apres levee',
+      channel,
+      nextAction: nextActionByChannel[channel] || 'Lancer un test de contenu sur le canal prioritaire.',
+      confidence: bestAvailable ? 'Elevee' : 'Moyenne',
+    },
+  };
+}
+
+function ActionPlanSection({ plan }) {
+  return (
+    <div className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+      <h3 className="text-sm font-medium text-indigo-400 mb-3">Plan d'action media (7 jours)</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-700/40">
+          <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+            <Lightbulb className="w-3.5 h-3.5" />
+            Sujet prioritaire
+          </div>
+          <p className="text-sm text-white leading-relaxed">{plan.subject}</p>
+        </div>
+        <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-700/40">
+          <div className="flex items-center gap-2 text-slate-400 text-xs mb-2">
+            <Megaphone className="w-3.5 h-3.5" />
+            Canal recommande
+          </div>
+          <div className="flex items-center gap-2">
+            <NetworkIcon network={plan.channel} size="sm" />
+            <span className="text-sm text-white">{NETWORKS[plan.channel]?.name || plan.channel}</span>
+          </div>
+          <span className={`inline-flex mt-2 px-2 py-0.5 rounded-full text-xs ${
+            plan.confidence === 'Elevee'
+              ? 'bg-emerald-500/10 text-emerald-400'
+              : 'bg-amber-500/10 text-amber-400'
+          }`}>
+            Confiance {plan.confidence}
+          </span>
+        </div>
+        <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-700/40">
+          <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
+            <CalendarClock className="w-3.5 h-3.5" />
+            Prochaine action
+          </div>
+          <p className="text-sm text-white leading-relaxed">{plan.nextAction}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TopContentSection({ topContents }) {
+  return (
+    <div className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+      <h3 className="text-sm font-medium text-indigo-400 mb-3">Contenus qui performent le mieux</h3>
+      {topContents.length > 0 ? (
+        <div className="space-y-2">
+          {topContents.map((content) => (
+            <div
+              key={content.id}
+              className="p-3 rounded-xl bg-slate-900/40 border border-slate-700/40 flex items-start justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <div className="text-sm text-white truncate">
+                  {content.kolName} • {content.niche}
+                </div>
+                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{content.text}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="flex items-center gap-1.5 justify-end">
+                  <NetworkIcon network={content.network} size="sm" />
+                  <span className="text-xs text-slate-300">{NETWORKS[content.network]?.name || content.network}</span>
+                </div>
+                <div className="text-xs text-indigo-300 mt-1">Score {content.score}</div>
+                {!content.available && (
+                  <div className="text-[11px] text-amber-400 mt-1">Coming soon</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-slate-500 text-sm">Coming soon</p>
+      )}
+    </div>
+  );
+}
+
+function ChannelAvailabilitySection({ apiStatus }) {
+  const channels = ['twitter', 'youtube', 'linkedin', 'newsletter', 'tiktok', 'instagram'];
+  return (
+    <div className="p-4 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+      <h3 className="text-sm font-medium text-indigo-400 mb-3">Etat des canaux de donnees</h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {channels.map((channel) => {
+          const isReady = getChannelStatus(apiStatus, channel);
+          return (
+            <div key={channel} className="p-2.5 rounded-xl bg-slate-900/40 border border-slate-700/40 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <NetworkIcon network={channel} size="sm" />
+                <span className="text-xs text-slate-200 truncate">{NETWORKS[channel]?.name || channel}</span>
+              </div>
+              <span className={`text-[11px] px-1.5 py-0.5 rounded-full ${
+                isReady ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+              }`}>
+                {isReady ? 'Actif' : 'Coming soon'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -295,6 +456,7 @@ export default function Dashboard() {
   const [kols, setKols] = useState([]);
   const [intelligence, setIntelligence] = useState(null);
   const [roi, setRoi] = useState(null);
+  const [apiStatus, setApiStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeNetwork, setActiveNetwork] = useState(null);
   const [period, setPeriod] = useState('weekly');
@@ -306,12 +468,17 @@ export default function Dashboard() {
       api.getKOLs(),
       api.getIntelligence(),
       api.getRoi(),
+      api.getApiStatus(),
     ])
-      .then(([d, k, i, r]) => { setData(d); setKols(k || []); setIntelligence(i); setRoi(r); })
-      .catch(() => { setData({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } }); })
+      .then(([d, k, i, r, status]) => { setData(d); setKols(k || []); setIntelligence(i); setRoi(r); setApiStatus(status || null); })
+      .catch(() => {
+        setData({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } });
+        setApiStatus(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
+  const insights = useMemo(() => buildInsights(kols, apiStatus), [kols, apiStatus]);
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
@@ -351,6 +518,10 @@ export default function Dashboard() {
         <h2 className="text-sm font-medium text-slate-300">KOL Discovery</h2>
         <NetworkFilters active={activeNetwork} onChange={setActiveNetwork} />
       </div>
+
+      <ActionPlanSection plan={insights.actionPlan} />
+      <TopContentSection topContents={insights.topContents} />
+      <ChannelAvailabilitySection apiStatus={apiStatus} />
 
       {/* KOL cards — top 5, then "More" for next 5 */}
       {visibleKols.length > 0 ? (
