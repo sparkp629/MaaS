@@ -27,7 +27,8 @@ export default function HomeLogin() {
   const { login } = useAuth();
 
   const handleCta = async () => {
-    await login("github");
+    // Parcours principal sans blocage OAuth : entree directe en mode mock.
+    await login("mock");
     navigate("/app", { replace: true });
   };
 
