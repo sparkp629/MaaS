@@ -26,15 +26,31 @@ export default function HomeLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  function enterMockFlow() {
+    // Fallback durci : on persiste l'utilisateur mock avant redirection.
+    // Cela évite les cas où une navigation SPA est interrompue en preview.
+    const mockUser = {
+      id: "1",
+      name: "Utilisateur démo",
+      email: "demo@maas.example",
+      avatar: null,
+      provider: "mock",
+    };
+    localStorage.setItem("maas_user", JSON.stringify(mockUser));
+    // On force le passage par le sondage pour garder le parcours voulu.
+    localStorage.removeItem("maas_onboarded");
+  }
+
   const handleCta = async () => {
-    // Parcours principal sans blocage OAuth : entree directe en mode mock.
+    enterMockFlow();
     await login("mock");
-    navigate("/app", { replace: true });
+    window.location.assign("/app");
   };
 
   const handleMock = async () => {
+    enterMockFlow();
     await login("mock");
-    navigate("/app", { replace: true });
+    window.location.assign("/app");
   };
 
   return (
