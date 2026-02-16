@@ -1,104 +1,135 @@
-/**
- * Onglet Paiement & offres — non relié à la sidebar en prod (accès direct /app/payment).
- * Design : Magic Button + Deals KOL pré-bookés, même charte slate/indigo.
- */
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Zap, Handshake, CreditCard, ArrowLeft } from 'lucide-react';
-import { api } from '../api';
+import { Sparkles, Users, FileText, BarChart3, Zap } from 'lucide-react';
+
+function ComingSoonBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-medium border border-amber-500/25">
+      Coming soon
+    </span>
+  );
+}
 
 export default function PaymentTab() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const magicBenefits = [
+    { icon: FileText, label: 'Audit niche & recommandations', desc: 'Analyse automatique de ton positionnement' },
+    { icon: Users, label: 'Matching KOL qualifié', desc: 'Top créateurs filtrés par affinité' },
+    { icon: Sparkles, label: 'Contenu IA sur mesure', desc: 'Hooks et scripts adaptés à chaque KOL' },
+    { icon: BarChart3, label: 'ROI & suivi', desc: 'Métriques et attribution claires' },
+  ];
 
-  const handleMagicButton = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { url } = await api.createCheckoutSession({
-        successUrl: `${window.location.origin}/app/checkout/success`,
-        cancelUrl: `${window.location.origin}/app/payment`,
-      });
-      if (url) window.location.href = url;
-      else setError('Aucune URL de paiement reçue.');
-    } catch (e) {
-      setError(e.message || 'Erreur lors de la création du paiement.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dealTypes = [
+    { type: 'Fixe', desc: 'Prix fixe négocié avec le KOL', amount: 'XXX €', color: 'indigo' },
+    { type: 'Performance', desc: 'Rémunération liée aux résultats (CPS, CPA)', amount: 'Variable', color: 'emerald' },
+    { type: 'Mix', desc: 'Fix + bonus performance', amount: 'XXX € + bonus', color: 'amber' },
+  ];
+
+  const executionSteps = [
+    { num: 1, title: 'Contenu gagnant', desc: 'Hooks validés + brief créatif par plateforme' },
+    { num: 2, title: 'Génération IA', desc: 'Scripts, posts X/LinkedIn, vidéos courtes prêts à diffuser' },
+    { num: 3, title: 'Planification + deals', desc: 'Calendrier éditorial + activation Stripe des deals bookés' },
+  ];
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8">
-      <Link
-        to="/app"
-        className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Retour au Dashboard
-      </Link>
-
-      <header>
-        <h1 className="text-2xl font-bold text-white">Paiement & offres</h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Magic Button (audit + première campagne) et deals KOL de votre niche, prêts à réserver.
+      {/* Header */}
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-white mb-2">
+          Paiement & Offres MaaS (Preview)
+        </h1>
+        <p className="text-slate-400 text-sm max-w-xl mx-auto">
+          Cette vue est prête visuellement mais n’est pas encore activée en production. Les offres et paiements seront disponibles après la finalisation de l’intégration Stripe.
         </p>
-      </header>
+      </div>
 
-      {/* Bloc Magic Button — audit + première campagne */}
-      <section className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-slate-900/30 p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-indigo-500/20 shrink-0">
-            <Zap className="w-8 h-8 text-indigo-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-white mb-1">Magic Button</h2>
-            <p className="text-slate-400 text-sm mb-4">
-              Service turnkey — audit Mindshare + première campagne clé en main (Thread X, LinkedIn, Short).
-            </p>
-            <ul className="text-slate-300 text-sm space-y-1.5 mb-4">
-              <li>• Audit Mindshare de votre produit</li>
-              <li>• Matching KOLs qualifiés par conversion réelle</li>
-              <li>• Première campagne (contenu + planification)</li>
-              <li>• Suivi ROI et attribution</li>
-            </ul>
-            <p className="text-indigo-400 font-medium text-sm mb-4">
-              Tarif : à configurer (STRIPE_PRICE_ID)
-            </p>
-            <button
-              onClick={handleMagicButton}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 rounded-xl text-white font-medium text-sm transition-colors"
+      {/* Section 1: Magic Button */}
+      <section className="rounded-2xl bg-slate-800/30 border border-slate-700/30 p-5">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <h2 className="text-base font-semibold text-white flex items-center gap-2">
+            <Zap className="w-4 h-4 text-indigo-400" />
+            Magic Button
+          </h2>
+          <ComingSoonBadge />
+        </div>
+        <p className="text-slate-400 text-sm mb-5">
+          Tout-en-un : audit, matching KOL, contenu IA et suivi ROI. Activation Stripe prévue prochainement.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {magicBenefits.map(({ icon: Icon, label, desc }) => (
+            <div
+              key={label}
+              className="p-3 rounded-xl bg-slate-900/50 border border-slate-700/30"
             >
-              {loading ? 'Redirection...' : 'Payer maintenant'}
-            </button>
-            {error && <p className="text-amber-400 text-sm mt-3">{error}</p>}
-          </div>
-        </div>
-      </section>
-
-      {/* Bloc Deals KOL pré-bookés — luxe : ne pas chercher, avoir prêt */}
-      <section className="rounded-2xl border border-slate-700/30 bg-gradient-to-br from-slate-800/30 to-slate-900/20 p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-emerald-500/20 shrink-0">
-            <Handshake className="w-8 h-8 text-emerald-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-white mb-1">Deals KOL déjà bookés</h2>
-            <p className="text-slate-400 text-sm mb-3">
-              Des KOLs de votre niche, pré-négociés (fixe, commission ou mix). Vous choisissez le deal, on livre la campagne.
-            </p>
-            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-600/30 text-slate-500 text-sm">
-              <CreditCard className="w-4 h-4" />
-              Coming soon
+              <Icon className="w-5 h-5 text-indigo-400 mb-2" />
+              <div className="font-medium text-white text-sm">{label}</div>
+              <div className="text-xs text-slate-500 mt-0.5">{desc}</div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      <p className="text-slate-500 text-xs">
-        Cette page n’est pas encore reliée à la navigation principale. Pour l’afficher en prod, ajouter une entrée dans <code className="text-slate-400">NAV_ITEMS</code> de <code className="text-slate-400">LayoutDashboard.jsx</code>.
-      </p>
+      {/* Section 2: Deals KOL déjà bookés */}
+      <section className="rounded-2xl bg-slate-800/30 border border-slate-700/30 p-5">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <h2 className="text-base font-semibold text-white">
+            Deals KOL déjà bookés
+          </h2>
+          <ComingSoonBadge />
+        </div>
+        <p className="text-slate-400 text-sm mb-5">
+          Gère tes contrats KOL (fixe, performance ou mix). L’affichage et le paiement seront connectés à Stripe.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {dealTypes.map(({ type, desc, amount, color }) => {
+            const colorClasses = {
+              indigo: 'from-indigo-500/10 to-indigo-500/5 border-indigo-500/20',
+              emerald: 'from-emerald-500/10 to-emerald-500/5 border-emerald-500/20',
+              amber: 'from-amber-500/10 to-amber-500/5 border-amber-500/20',
+            };
+            const textColors = {
+              indigo: 'text-indigo-400',
+              emerald: 'text-emerald-400',
+              amber: 'text-amber-400',
+            };
+            return (
+              <div
+                key={type}
+                className={`p-4 rounded-xl bg-gradient-to-br ${colorClasses[color]} border`}
+              >
+                <div className={`font-semibold text-white mb-1 ${textColors[color]}`}>
+                  {type}
+                </div>
+                <div className="text-slate-400 text-sm mb-2">{desc}</div>
+                <div className="text-xs text-slate-500">{amount}</div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Section 3: Exécution */}
+      <section className="rounded-2xl bg-slate-800/30 border border-slate-700/30 p-5">
+        <h2 className="text-base font-semibold text-white mb-4">
+          Exécution
+        </h2>
+        <p className="text-slate-400 text-sm mb-6">
+          Workflow en 3 étapes : du contenu validé jusqu’à la planification et aux deals activés.
+        </p>
+        <div className="space-y-4">
+          {executionSteps.map(({ num, title, desc }) => (
+            <div
+              key={num}
+              className="flex gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-700/30"
+            >
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                {num}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-white">{title}</div>
+                <div className="text-sm text-slate-500 mt-0.5">{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

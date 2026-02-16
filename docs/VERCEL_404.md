@@ -7,4 +7,4 @@ La config du projet est prête. Si après un nouveau déploiement la page reste 
 3. Clique sur **Edit**, mets : **frontend** (sans slash), puis enregistre.
 4. Redéploie (onglet Deployments → les trois points sur le dernier déploiement → Redeploy).
 
-Ensuite réessaie d’ouvrir l’URL de ton déploiement (ex. **https://maa-s.vercel.app** ou l’URL de preview Vercel type `maa-s-git-main-…vercel.app`).
+Ensuite réessaie d’ouvrir http://maa-s-git-main-sparkp629s-projects.vercel.app/

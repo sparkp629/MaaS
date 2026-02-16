@@ -1,26 +1,34 @@
 /**
  * Landing page — slogan + CTA direct vers le dashboard
- * Pas de "connexion" visible : le bouton invite a decouvrir, pas a s'identifier
+ * Pas de "connexion" visible : le bouton invite à découvrir
  */
-import { CheckCircle, ArrowRight, Zap, Copy, TrendingUp, Target, Calendar, Handshake } from 'lucide-react';
+import {
+  CheckCircle,
+  ArrowRight,
+  Zap,
+  Copy,
+  TrendingUp,
+  Target,
+  Calendar,
+  Handshake,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const FEATURES = [
   'Audit Mindshare de votre produit',
-  'Matching KOLs qualifies par conversion reelle',
-  'Premiere campagne cle en main (X Thread, LinkedIn, Short)',
-  'Suivi ROI et attribution en temps reel',
-  'Intelligence concurrentielle automatisee',
+  'Matching KOLs qualifiés par conversion réelle',
+  'Première campagne clé en main (X Thread, LinkedIn, Short)',
+  'Suivi ROI et attribution en temps réel',
+  'Intelligence concurrentielle automatisée',
 ];
 
-/** Icônes évocatrices : contenu qui marche, canal, cible, planification, deals KOL */
 const LANDING_ICONS = [
-  { icon: Copy, label: 'Contenus à fort engagement' },
-  { icon: TrendingUp, label: 'Ce qui marche dans votre niche' },
-  { icon: Target, label: 'Sujet + canal clés en main' },
-  { icon: Calendar, label: 'Génération IA et planification' },
-  { icon: Handshake, label: 'Deals KOL déjà bookés' },
+  { icon: Copy, label: 'Contenus qui performent' },
+  { icon: TrendingUp, label: 'Canaux qui engagent' },
+  { icon: Target, label: 'Sujets à reproduire' },
+  { icon: Calendar, label: 'Planification IA' },
+  { icon: Handshake, label: 'Deals KOL bookés' },
 ];
 
 export default function HomeLogin() {
@@ -33,42 +41,38 @@ export default function HomeLogin() {
 
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center px-6">
-      {/* Badge */}
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm mb-6">
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
         100% gratuit pour votre premier audit
       </div>
 
       <h1 className="text-4xl md:text-6xl font-bold text-white text-center mb-4 leading-tight">
-        Vos concurrents ont une longueur d'avance.
+        Vos concurrents ont une longueur d&apos;avance.
         <br />
         <span className="text-indigo-400">On vous montre laquelle.</span>
       </h1>
 
       <p className="text-slate-400 text-lg text-center max-w-xl mb-6">
         MaaS analyse votre niche, identifie les KOLs qui convertissent vraiment,
-        et vous donne un plan d'action concret en quelques minutes.
+        et vous donne un plan d&apos;action concret en quelques minutes.
       </p>
 
-      {/* Second slogan — faire comme la concurrence */}
-      <p className="text-slate-300/90 text-base text-center max-w-2xl mb-10 italic">
-        Le but n'est pas de se démarquer, le but serait paradoxalement de faire comme la concurrence.
+      <p className="text-slate-300/90 text-base text-center max-w-2xl mb-8 italic">
+        Le but n&apos;est pas de se démarquer, le but serait paradoxalement de faire comme la concurrence.
         Incongru mais réaliste : on ne réinvente pas un truc qui marche, on vous montre ce qui marche.
       </p>
 
-      {/* Icônes évocatrices */}
       <div className="flex flex-wrap justify-center gap-6 mb-10">
         {LANDING_ICONS.map(({ icon: Icon, label }) => (
           <div key={label} className="flex flex-col items-center gap-2 text-slate-400 hover:text-indigo-300 transition-colors">
             <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-600/40">
               <Icon className="w-5 h-5" />
             </div>
-            <span className="text-xs text-center max-w-[100px]">{label}</span>
+            <span className="text-xs text-center max-w-[110px]">{label}</span>
           </div>
         ))}
       </div>
 
-      {/* CTA principal — pas de mention "connexion", invite a decouvrir */}
       <button
         onClick={handleCta}
         className="flex items-center gap-3 px-8 py-4 bg-indigo-500 hover:bg-indigo-600 rounded-2xl text-white font-semibold text-lg shadow-xl shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 hover:scale-[1.02] mb-12"
@@ -78,7 +82,6 @@ export default function HomeLogin() {
         <ArrowRight className="w-5 h-5" />
       </button>
 
-      {/* Features list */}
       <div className="max-w-md w-full space-y-3">
         {FEATURES.map((f) => (
           <div key={f} className="flex items-center gap-3 text-slate-300 text-sm">
@@ -88,7 +91,6 @@ export default function HomeLogin() {
         ))}
       </div>
 
-      {/* Social proof */}
       <div className="mt-12 flex items-center gap-6 text-slate-500 text-sm">
         <span>Niches couvertes</span>
         <div className="flex gap-2">

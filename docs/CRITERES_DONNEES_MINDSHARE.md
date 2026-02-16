@@ -1,25 +1,35 @@
 # Critères de sélection des données affichées (Mindshare)
 
-## But du mindshare (rappel)
+## But produit
 
-L’objectif n’est **pas** de livrer au client des graphiques pour qu’il analyse lui‑même. C’est de lui donner **clés en main** :
+Le dashboard ne doit pas juste montrer des métriques.  
+Il doit donner une lecture **actionnable** :
 
-1. **La nature des contenus qui ont eu le plus d’engagement** — quel sujet, sur quel canal, sous quelle forme — pour qu’il sache quoi faire concrètement.
-2. **Faire comme la concurrence** — pas de “se démarquer” pour le plaisir : on réplique ce qui marche déjà dans la niche.
-3. **Générer du contenu** avec les meilleurs modèles IA, et le **planifier**.
-4. **Proposer des deals déjà bookés** avec des KOLs de sa niche (luxe = ne pas chercher les KOLs, les avoir prêts).
+1. Quel contenu fonctionne déjà dans la niche.
+2. Sur quel canal le reproduire.
+3. Quels KOLs activent réellement la conversion.
+4. Quels blocs sont prêts en IA (génération + planification).
+5. Quels deals KOL sont disponibles (ou en préparation).
 
-## Critères de sélection des données à afficher
+## Critères de sélection
 
-Les données affichées doivent servir **directement** ce but :
+Les données affichées sont retenues si elles répondent à au moins un de ces objectifs :
 
-| Critère | Exemple |
-|--------|---------|
-| **Contenu à fort engagement** | Types de posts (thread, post LinkedIn, short), sujets, ton — pas seulement des métriques brutes. |
-| **Canal + format** | Quel canal (X, LinkedIn, YouTube, newsletter) et quel format a performé, pour reproduire. |
-| **KOLs qui convertissent** | Matching par conversion réelle, pas seulement followers ; prévisualisation de leur contenu. |
-| **Segments en demande** | Segments où la demande est forte (pour choisir sujets et angles). |
-| **Faiblesses concurrents** | Pour s’aligner sur ce qui marche (faire comme les autres) ou éviter les angles déjà saturés. |
-| **ROI / attribution** | Clicks, impressions, tendances — pour valider que “ce qui marche” est bien mesuré. |
+- **Contenu gagnant** : sujet, angle, format (thread, post, short), niveau d’engagement.
+- **Canal gagnant** : X, LinkedIn, YouTube, newsletter… avec contexte d’usage.
+- **KOL utile business** : score de conversion, pas seulement volume de followers.
+- **Segments en demande** : signaux marché pour savoir quoi publier ensuite.
+- **ROI lisible** : clicks, impressions, croissance, dépenses pour valider ce qui marche.
 
-Tout bloc dont les données ne sont **pas encore extraites** ou pas disponibles côté API est affiché avec le libellé **« Coming soon »** (et non une erreur ou un message technique), pour rester cohérent avec la promesse produit.
+## Principe stratégique affiché au client
+
+> Le but n’est pas de se démarquer à tout prix.  
+> Le but, de façon réaliste, est de reproduire ce qui fonctionne déjà dans la niche.
+
+## Gestion des données non extraites
+
+Quand une donnée n’est pas encore collectée/exploitable, l’interface affiche :
+
+**Coming soon**
+
+Pas d’erreur technique exposée au client, pas de bloc “cassé”.

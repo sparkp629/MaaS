@@ -52,9 +52,10 @@ function AppRoutes() {
         <Route path="/app" element={<LayoutDashboard />}>
           <Route index element={<Dashboard />} />
           <Route path="competitors" element={<CampaignEngine />} />
-          <Route path="payment" element={<PaymentTab />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="checkout/success" element={<CheckoutSuccess />} />
+          {/* Preview interne: route prête, non liée dans la sidebar pour l'instant */}
+          <Route path="payment-preview" element={<PaymentTab />} />
         </Route>
       </Routes>
     );
