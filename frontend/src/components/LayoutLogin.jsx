@@ -23,7 +23,7 @@ export default function LayoutLogin() {
             {isLoggedIn && (
               <>
                 <Link
-                  to="/dashboard"
+                  to="/app"
                   className="text-sm text-slate-400 hover:text-white"
                 >
                   Dashboard

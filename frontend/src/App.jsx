@@ -49,6 +49,7 @@ function AppRoutes() {
     return (
       <Routes key="dashboard">
         <Route path="/" element={<Navigate to="/app" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/app" replace />} />
         <Route path="/app" element={<LayoutDashboard />}>
           <Route index element={<Dashboard />} />
           <Route path="competitors" element={<CampaignEngine />} />
