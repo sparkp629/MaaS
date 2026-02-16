@@ -7,9 +7,9 @@ import Dashboard from './pages/Dashboard';
 import CampaignEngine from './pages/CampaignEngine';
 import Checkout from './pages/Checkout';
 import CheckoutSuccess from './pages/CheckoutSuccess';
-import PaymentTab from './pages/PaymentTab';
 import LoginGate from './pages/LoginGate';
 import Onboarding from './pages/Onboarding';
+import PaymentTab from './pages/PaymentTab';
 import { useAuth } from './context/AuthContext';
 
 /**
@@ -52,10 +52,9 @@ function AppRoutes() {
         <Route path="/app" element={<LayoutDashboard />}>
           <Route index element={<Dashboard />} />
           <Route path="competitors" element={<CampaignEngine />} />
+          <Route path="payment" element={<PaymentTab />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="checkout/success" element={<CheckoutSuccess />} />
-          {/* Preview interne: route prête, non liée dans la sidebar pour l'instant */}
-          <Route path="payment-preview" element={<PaymentTab />} />
         </Route>
       </Routes>
     );
