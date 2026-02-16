@@ -26,8 +26,14 @@ export default function HomeLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleCta = () => {
-    login("github").then(() => navigate("/app", { replace: true }));
+  const handleCta = async () => {
+    await login("github");
+    navigate("/app", { replace: true });
+  };
+
+  const handleMock = async () => {
+    await login("mock");
+    navigate("/app", { replace: true });
   };
 
   return (
@@ -73,6 +79,13 @@ export default function HomeLogin() {
         <Zap className="w-5 h-5" />
         Voir ce que je manque
         <ArrowRight className="w-5 h-5" />
+      </button>
+
+      <button
+        onClick={handleMock}
+        className="mb-8 text-sm text-slate-400 hover:text-indigo-300 transition-colors underline underline-offset-4"
+      >
+        Continuer en mode mock
       </button>
 
       {/* Features list */}

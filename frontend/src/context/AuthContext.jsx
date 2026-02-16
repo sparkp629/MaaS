@@ -9,6 +9,18 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  function setMockUser(provider = 'mock') {
+    const mockUser = {
+      id: '1',
+      name: 'Utilisateur démo',
+      email: 'demo@maas.example',
+      avatar: null,
+      provider,
+    };
+    flushSync(() => setUser(mockUser));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
+  }
+
   useEffect(() => {
     if (isSupabaseConfigured() && supabase) {
       const done = () => setLoading(false);
@@ -58,22 +70,30 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (provider = 'github') => {
-    if (isSupabaseConfigured() && supabase) {
-      await supabase.auth.signInWithOAuth({
-        provider: provider === 'github' ? 'github' : 'google',
-        options: { redirectTo: window.location.origin + window.location.pathname },
-      });
-    } else {
-      const mockUser = {
-        id: '1',
-        name: 'Utilisateur démo',
-        email: 'demo@maas.example',
-        avatar: null,
-        provider,
-      };
-      flushSync(() => setUser(mockUser));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
+    if (provider === 'mock') {
+      setMockUser('mock');
+      return;
     }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: provider === 'github' ? 'github' : 'google',
+          options: { redirectTo: window.location.origin + window.location.pathname },
+        });
+        if (error) {
+          // Si OAuth est mal configuré en preview/prod, on ne bloque pas le parcours.
+          console.error('[Auth] OAuth error, fallback to mock mode:', error.message);
+          setMockUser('mock-fallback');
+        }
+      } catch (e) {
+        console.error('[Auth] OAuth failed, fallback to mock mode:', e);
+        setMockUser('mock-fallback');
+      }
+      return;
+    }
+
+    setMockUser(provider);
   };
 
   const logout = async () => {
