@@ -4,7 +4,7 @@
  */
 
 const SUPABASE_URL = process.env.URL_SUPABASE || null;
-const SUPABASE_KEY = process.env.API_KEY_SUPABASE || null;
+const SUPABASE_KEY = process.env.API_KEY_SUPABASE || process.env.VITE_SUPABASE_ANON_KEY || process.env.PUBLISHABLE_KEY_SUPABASE || null;
 
 /**
  * Vérifie le token Supabase via l'endpoint /auth/v1/user

@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
         env.VITE_SUPABASE_URL || env.URL_SUPABASE || ''
       ),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
-        env.VITE_SUPABASE_ANON_KEY || env.API_KEY_SUPABASE || ''
+        env.VITE_SUPABASE_ANON_KEY || env.API_KEY_SUPABASE || env.PUBLISHABLE_KEY_SUPABASE || ''
       ),
     },
     server: {

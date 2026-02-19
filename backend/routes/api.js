@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
-import { getDashboardSummary, getSampleKOLs } from '../db/samples.js';
 import { orchestrate, orchestrateWithAI } from '../services/contentOrchestrator.js';
-import { getIntelligenceSummary } from '../services/marketAnalysis.js';
 import {
   createSuggestion,
   getRoiSummary,
@@ -14,22 +12,232 @@ import {
 import { rateLimitSuggestions } from '../middleware/rateLimit.js';
 import * as xClient from '../services/xClient.js';
 import * as youtubeClient from '../services/youtubeClient.js';
+import * as linkedinClient from '../services/linkedinClient.js';
+import * as metaClient from '../services/metaClient.js';
+import * as tiktokClient from '../services/tiktokClient.js';
+import { computeMultiChannelMI } from '../services/mindshareIndex.js';
+import { computeConversionScore } from '../services/kolScoring.js';
 
 const router = Router();
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
+function levelFromScore(score) {
+  if (score >= 80) return 'Dominant';
+  if (score >= 60) return 'Fort';
+  if (score >= 40) return 'Croissant';
+  if (score >= 20) return 'Émergent';
+  return 'Invisible';
+}
+
+function parseExtra(extraJson) {
+  if (!extraJson) return {};
+  try {
+    return JSON.parse(extraJson);
+  } catch {
+    return {};
+  }
+}
+
+function normalizeUrl(value) {
+  try {
+    const url = new URL(value);
+    return `${url.origin}${url.pathname}`.replace(/\/$/, '').toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function toKolPreview(platform, row, extra) {
+  if (platform === 'twitter') {
+    return {
+      twitter: {
+        text: `Impressions moyennes : ${(extra.avgImpressions || row.impressions || 0).toLocaleString()} • ER ${row.engagement_rate || 0}%`,
+        avatarUrl: null,
+      },
+    };
+  }
+  if (platform === 'youtube') {
+    const firstVideo = Array.isArray(extra.recentVideos) ? extra.recentVideos[0] : null;
+    return {
+      youtube: {
+        thumbnailUrl: firstVideo?.thumbnailUrl || null,
+        avatarUrl: null,
+      },
+    };
+  }
+  if (platform === 'linkedin') {
+    return {
+      linkedin: {
+        text: `Followers : ${(row.followers || 0).toLocaleString()} • Impressions : ${(row.impressions || 0).toLocaleString()}`,
+      },
+    };
+  }
+  return {};
+}
+
+function toDashboardKol(row) {
+  const platform = row.platform || 'unknown';
+  const extra = parseExtra(row.extra_json);
+  const externalLinks = [
+    ...(Array.isArray(extra.profileLinks) ? extra.profileLinks : []),
+    ...(extra.channelUrl ? [extra.channelUrl] : []),
+  ].filter((link, idx, arr) => arr.indexOf(link) === idx);
+  const metrics = {
+    mentions: Math.round((row.impressions || 0) / 1000),
+    sentiment: Math.min(100, Math.round((row.engagement_rate || 0) * 8)),
+  };
+
+  if (platform === 'twitter') {
+    metrics.twitter = { impressions: row.impressions || 0, engagementRate: row.engagement_rate || 0 };
+  } else if (platform === 'youtube') {
+    metrics.youtube = { views: row.views || row.impressions || 0 };
+  } else if (platform === 'linkedin') {
+    metrics.linkedin = { impressions: row.impressions || 0, engagementRate: row.engagement_rate || 0 };
+  } else if (platform === 'newsletter') {
+    metrics.newsletter = { opens: row.impressions || 0, ctr: row.engagement_rate || 0 };
+  }
+
+  const mi = computeMultiChannelMI(metrics);
+  const conv = computeConversionScore({
+    technicalSentiment: Math.min(100, Math.round((row.engagement_rate || 0) * 8)),
+    growthVelocity: 0,
+    followers: row.followers || 0,
+    engagementRate: row.engagement_rate || 0,
+  });
+
+  return {
+    id: `${platform}-${row.platform_user_id || row.id}`,
+    handle: row.handle || `@${platform}_${row.platform_user_id || row.id}`,
+    displayName: row.display_name || row.handle || `Compte ${platform}`,
+    avatarUrl: null,
+    followers: row.followers || 0,
+    niche: platform.toUpperCase(),
+    conversionScore: conv.value,
+    mindshareIndex: mi.value,
+    engagementRate: row.engagement_rate ? `${row.engagement_rate}%` : '—',
+    isMicroKOL: conv.isMicroKOL,
+    previews: toKolPreview(platform, row, extra),
+    externalLinks,
+  };
+}
+
+function getRealKols() {
+  const metrics = getKolMetrics();
+  return metrics.map(toDashboardKol);
+}
+
+function getRealDashboardSummary() {
+  const kols = getRealKols();
+  const avgMI = kols.length
+    ? kols.reduce((sum, kol) => sum + (kol.mindshareIndex || 0), 0) / kols.length
+    : 0;
+
+  return {
+    kolCount: kols.length,
+    campaigns: [],
+    mindshare: {
+      value: Math.round(avgMI * 10) / 10,
+      level: levelFromScore(avgMI),
+    },
+  };
+}
+
+function getRealIntelligenceSummary() {
+  const metrics = getKolMetrics();
+  const byPlatform = new Map();
+
+  for (const row of metrics) {
+    const key = row.platform || 'unknown';
+    const current = byPlatform.get(key) || { platform: key, demandTotal: 0, count: 0 };
+    const demandScore = Math.min(
+      100,
+      Math.round(
+        (row.followers || 0) / 200 +
+        (row.impressions || 0) / 2000 +
+        (row.engagement_rate || 0) * 2
+      )
+    );
+    current.demandTotal += demandScore;
+    current.count += 1;
+    byPlatform.set(key, current);
+  }
+
+  const segments = Array.from(byPlatform.values())
+    .map((item) => ({
+      id: item.platform,
+      name: `Canal ${item.platform.toUpperCase()}`,
+      demand: Math.round(item.demandTotal / Math.max(1, item.count)),
+      growth: 0,
+      label: `Canal ${item.platform.toUpperCase()} — demande ${(item.demandTotal / Math.max(1, item.count)).toFixed(1)}/100`,
+    }))
+    .sort((a, b) => b.demand - a.demand)
+    .slice(0, 5);
+
+  return {
+    segments,
+    competitors: [],
+    dimensions: [],
+  };
+}
+
+function getKolMesh() {
+  const rows = getKolMetrics('youtube');
+  const nodes = rows.map((row) => {
+    const extra = parseExtra(row.extra_json);
+    const links = Array.isArray(extra.profileLinks) ? extra.profileLinks : [];
+    const channelUrl = extra.channelUrl || null;
+    return {
+      id: `youtube-${row.platform_user_id || row.id}`,
+      platformUserId: row.platform_user_id || null,
+      handle: row.handle || null,
+      displayName: row.display_name || row.handle || null,
+      channelUrl,
+      links,
+    };
+  });
+
+  const nodeByUrl = new Map();
+  for (const node of nodes) {
+    if (node.channelUrl) {
+      const key = normalizeUrl(node.channelUrl);
+      if (key) nodeByUrl.set(key, node.id);
+    }
+  }
+
+  const edges = [];
+  for (const node of nodes) {
+    for (const link of node.links) {
+      const target = nodeByUrl.get(normalizeUrl(link));
+      if (target && target !== node.id) {
+        edges.push({
+          from: node.id,
+          to: target,
+          type: 'youtube_to_youtube',
+          link,
+        });
+      }
+    }
+  }
+
+  return { nodes, edges };
+}
+
 router.get('/dashboard', (_, res) => {
-  res.json(getDashboardSummary());
+  res.json(getRealDashboardSummary());
 });
 
 router.get('/kol', (_, res) => {
-  res.json(getSampleKOLs());
+  res.json(getRealKols());
 });
 
 router.get('/intelligence', (_, res) => {
-  res.json(getIntelligenceSummary());
+  res.json(getRealIntelligenceSummary());
+});
+
+router.get('/kol/mesh', (_, res) => {
+  res.json(getKolMesh());
 });
 
 router.get('/roi', (_, res) => {
@@ -153,7 +361,7 @@ router.post('/kol/fetch/x', async (req, res) => {
 // Fetch & store YouTube KOL metrics
 router.post('/kol/fetch/youtube', async (req, res) => {
   const { channelId } = req.body || {};
-  if (!channelId) return res.status(400).json({ error: 'channelId requis (UC... ou nom)' });
+  if (!channelId) return res.status(400).json({ error: 'channelId requis (UC..., @handle ou URL)' });
   if (!youtubeClient.isConfigured()) {
     return res.status(503).json({ error: 'YOUTUBE_API_KEY non configuré. Ajoutez-le dans .env' });
   }
@@ -169,7 +377,157 @@ router.post('/kol/fetch/youtube', async (req, res) => {
       engagementRate: 0,
       views: data.views,
       subscribers: data.subscribers,
-      extra: { videoCount: data.videoCount, recentVideos: data.recentVideos },
+      extra: {
+        videoCount: data.videoCount,
+        recentVideos: data.recentVideos,
+        profileLinks: data.profileLinks || [],
+        profileDescription: data.profileDescription || '',
+        channelUrl: data.channelUrl || null,
+      },
+    });
+    res.json({ ...data, dbResult: result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/kol/fetch/youtube/batch', async (req, res) => {
+  const { channels } = req.body || {};
+  if (!Array.isArray(channels) || channels.length === 0) {
+    return res.status(400).json({ error: 'channels requis (tableau de @handle, URL ou ID)' });
+  }
+  if (!youtubeClient.isConfigured()) {
+    return res.status(503).json({ error: 'YOUTUBE_API_KEY non configuré. Ajoutez-le dans .env' });
+  }
+
+  const results = [];
+  for (const rawRef of channels) {
+    const ref = String(rawRef || '').trim();
+    if (!ref) {
+      results.push({ ref, ok: false, error: 'Référence vide' });
+      continue;
+    }
+    try {
+      const data = await youtubeClient.fetchKolMetrics(ref);
+      const dbResult = upsertKolMetric({
+        platform: data.platform,
+        platformUserId: data.platformUserId,
+        handle: data.handle,
+        displayName: data.displayName,
+        followers: data.subscribers,
+        impressions: data.totalViews,
+        engagementRate: 0,
+        views: data.views,
+        subscribers: data.subscribers,
+        extra: {
+          videoCount: data.videoCount,
+          recentVideos: data.recentVideos,
+          profileLinks: data.profileLinks || [],
+          profileDescription: data.profileDescription || '',
+          channelUrl: data.channelUrl || null,
+        },
+      });
+      results.push({
+        ref,
+        ok: true,
+        platformUserId: data.platformUserId,
+        handle: data.handle,
+        displayName: data.displayName,
+        subscribers: data.subscribers,
+        profileLinks: data.profileLinks || [],
+        channelUrl: data.channelUrl || null,
+        dbResult,
+      });
+    } catch (error) {
+      results.push({ ref, ok: false, error: error.message });
+    }
+  }
+
+  const okCount = results.filter((item) => item.ok).length;
+  res.json({
+    okCount,
+    errorCount: results.length - okCount,
+    results,
+  });
+});
+
+// Fetch & store LinkedIn KOL metrics
+router.post('/kol/fetch/linkedin', async (req, res) => {
+  const { accessToken, organizationId } = req.body || {};
+  if (!organizationId) return res.status(400).json({ error: 'organizationId requis (urn:li:organization:...)' });
+  if (!accessToken) return res.status(400).json({ error: 'accessToken LinkedIn requis' });
+  if (!linkedinClient.isConfigured()) {
+    return res.status(503).json({ error: 'LinkedIn non configuré. Ajoutez LINKEDIN_CLIENT_ID et LINKEDIN_CLIENT_SECRET dans .env' });
+  }
+  try {
+    const data = await linkedinClient.fetchKolMetrics(accessToken, organizationId);
+    const result = upsertKolMetric({
+      platform: data.platform,
+      platformUserId: data.platformUserId,
+      handle: data.handle || organizationId,
+      displayName: data.displayName || organizationId,
+      followers: data.followers || 0,
+      impressions: data.impressions || 0,
+      engagementRate: data.engagementRate || 0,
+      views: data.views || 0,
+      subscribers: 0,
+      extra: data.extra || null,
+    });
+    res.json({ ...data, dbResult: result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Fetch & store Meta (Facebook/Instagram) KOL metrics
+router.post('/kol/fetch/meta', async (req, res) => {
+  const { accessToken, pageId } = req.body || {};
+  if (!pageId) return res.status(400).json({ error: 'pageId requis' });
+  if (!accessToken) return res.status(400).json({ error: 'accessToken Meta requis' });
+  if (!metaClient.isConfigured()) {
+    return res.status(503).json({ error: 'Meta non configuré. Ajoutez META_APP_ID et META_APP_SECRET dans .env' });
+  }
+  try {
+    const data = await metaClient.fetchKolMetrics(accessToken, pageId);
+    const result = upsertKolMetric({
+      platform: data.platform,
+      platformUserId: data.platformUserId,
+      handle: data.handle || pageId,
+      displayName: data.displayName || pageId,
+      followers: data.followers || 0,
+      impressions: data.impressions || 0,
+      engagementRate: data.engagementRate || 0,
+      views: data.views || 0,
+      subscribers: 0,
+      extra: data.extra || null,
+    });
+    res.json({ ...data, dbResult: result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Fetch & store TikTok KOL metrics
+router.post('/kol/fetch/tiktok', async (req, res) => {
+  const { accessToken, userId } = req.body || {};
+  if (!accessToken) return res.status(400).json({ error: 'accessToken TikTok requis' });
+  if (!userId) return res.status(400).json({ error: 'userId TikTok requis' });
+  if (!tiktokClient.isConfigured()) {
+    return res.status(503).json({ error: 'TikTok non configuré. Ajoutez TIKTOK_CLIENT_KEY et TIKTOK_CLIENT_SECRET dans .env' });
+  }
+  try {
+    const data = await tiktokClient.fetchKolMetrics(accessToken, userId);
+    const result = upsertKolMetric({
+      platform: data.platform,
+      platformUserId: data.platformUserId,
+      handle: data.handle || userId,
+      displayName: data.displayName || userId,
+      followers: data.followers || 0,
+      impressions: data.impressions || 0,
+      engagementRate: data.engagementRate || 0,
+      views: data.views || 0,
+      subscribers: 0,
+      extra: data.extra || null,
     });
     res.json({ ...data, dbResult: result });
   } catch (e) {
@@ -184,7 +542,7 @@ router.get('/status/apis', (_, res) => {
     x: xClient.isConfigured(),
     youtube: youtubeClient.isConfigured(),
     stripe: !!stripe,
-    supabase: !!(process.env.URL_SUPABASE && process.env.API_KEY_SUPABASE),
+    supabase: !!(process.env.URL_SUPABASE && (process.env.API_KEY_SUPABASE || process.env.PUBLISHABLE_KEY_SUPABASE || process.env.VITE_SUPABASE_ANON_KEY)),
     linkedin: !!(process.env.LINKEDIN_CLIENT_ID),
     meta: !!(process.env.META_APP_ID),
     tiktok: !!(process.env.TIKTOK_CLIENT_KEY),
