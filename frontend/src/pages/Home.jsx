@@ -1,9 +1,35 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, BarChart3, Users } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // no-op; keep for future
+  }, []);
+
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-6">
+      {/* Discreet admin button on landing: validates key silently and redirects if valid */}
+      <button
+        onClick={() => {
+          try {
+            const k = localStorage.getItem('admin_api_key');
+            if (!k) return;
+            fetch('/api/admin/validate', { headers: { 'x-admin-key': k } })
+              .then((r) => r.json())
+              .then((j) => {
+                if (j && j.ok) navigate('/app/admin');
+              })
+              .catch(() => {});
+          } catch (e) {}
+        }}
+        title="Admin"
+        className="absolute top-4 right-4 p-1 rounded opacity-10 hover:opacity-80 text-slate-400"
+      >
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4 12h4M16 12h4M6.5 6.5l2.8 2.8M14.7 14.7l2.8 2.8M6.5 17.5l2.8-2.8M14.7 9.3l2.8-2.8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
       <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4">
         Mindshare as a Service
       </h1>
