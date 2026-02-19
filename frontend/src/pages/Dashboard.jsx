@@ -49,7 +49,7 @@ function PeriodSelector({ active, onChange }) {
 function TrendCard({ label, value, change, icon: Icon }) {
   const up = (change ?? 0) >= 0;
   return (
-    <div className="rounded-2xl border border-slate-700/40 bg-slate-800/35 p-4">
+    <div className="rounded-2xl border border-indigo-900/40 bg-[#0c1635] p-4">
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs text-slate-400">{label}</span>
         {Icon && <Icon className="w-4 h-4 text-slate-500" />}
@@ -104,7 +104,7 @@ function KOLCard({ kol, activeNetwork, apiStatus }) {
     (selectedNetwork === 'instagram' && !apiStatus?.meta);
 
   return (
-    <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+    <div className="p-5 rounded-2xl bg-[#0c1635] border border-indigo-900/40">
       <div className="flex flex-col lg:flex-row gap-5">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-3">
@@ -201,7 +201,7 @@ export default function Dashboard() {
   const nicheCount = new Set(filteredKols.map((kol) => kol.niche)).size;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 max-w-6xl mx-auto space-y-6 text-slate-100">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-white">Dashboard</h1>
         <PeriodSelector active={period} onChange={setPeriod} />
@@ -209,7 +209,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <TrendCard label="KOLs Tracked" value={filteredKols.length || data?.kolCount || 0} icon={Users} />
-        <div className="rounded-2xl border border-slate-700/40 bg-slate-800/35 p-4 flex items-center gap-3">
+        <div className="rounded-2xl border border-indigo-900/40 bg-[#0c1635] p-4 flex items-center gap-3">
           <MindshareGauge value={data?.mindshare?.value ?? 0} level={data?.mindshare?.level ?? 'Invisible'} size="sm" />
           <div>
             <div className="text-slate-400 text-xs">Mindshare ({period === 'weekly' ? '7d' : period === 'monthly' ? '30d' : '1y'})</div>
@@ -314,7 +314,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-slate-700/40 bg-slate-800/35 p-4">
+          <div className="rounded-2xl border border-indigo-900/40 bg-[#0c1635] p-4">
             <h3 className="text-sm font-medium text-indigo-300 mb-2">High-demand segments</h3>
             {(intelligence?.segments || []).length > 0 ? intelligence.segments.map((segment) => (
               <div key={segment.id} className="flex items-center justify-between text-sm text-slate-200 py-1 border-b border-slate-800/60 last:border-0">
@@ -324,7 +324,7 @@ export default function Dashboard() {
             )) : <p className="text-sm text-slate-500">Coming soon</p>}
           </div>
 
-          <div className="rounded-2xl border border-slate-700/40 bg-slate-800/35 p-4">
+          <div className="rounded-2xl border border-indigo-900/40 bg-[#0c1635] p-4">
             <h3 className="text-sm font-medium text-indigo-300 mb-2">Competitor weaknesses</h3>
             {(intelligence?.competitors || []).length > 0 ? intelligence.competitors.map((competitor) => (
               <div key={competitor.competitorId} className="text-sm text-slate-200 py-2 border-b border-slate-800/60 last:border-0">
