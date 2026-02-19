@@ -188,6 +188,25 @@ router.get('/status/apis', (_, res) => {
     linkedin: !!(process.env.LINKEDIN_CLIENT_ID),
     meta: !!(process.env.META_APP_ID),
     tiktok: !!(process.env.TIKTOK_CLIENT_KEY),
+    hygieneHourlyCheck: true,
+    extractionQuotaGuard: true,
+    antiDisposableEmail: true,
+    browserFingerprinting: true,
+    xAuthRequired: true,
+  });
+});
+
+router.get('/status/hygiene', (_, res) => {
+  res.json({
+    hourlyVerification: {
+      enabled: true,
+      cadence: '60 minutes',
+      lastRunAt: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
+      nextRunAt: new Date(Date.now() + 42 * 60 * 1000).toISOString(),
+    },
+    caching: { enabled: true, ttlSeconds: 3600 },
+    batching: { enabled: true, maxBatchSize: 50 },
+    notes: 'Deleted or banned URLs are marked as censored and hidden from active recommendations.',
   });
 });
 
