@@ -27,27 +27,60 @@ npm run start
 
 Then **open your browser** at [http://localhost:5173](http://localhost:5173) (the command does not open it automatically). The landing page leads to onboarding (7 questions in 4 steps) then the dashboard.
 
-## Project structure
+# MaaS — Mindshare as a Service
 
-- `frontend/` — React SPA (landing, onboarding, dashboard, Competitor Search, checkout)
-- `backend/` — API (dashboard summary, KOLs, intelligence, content generation, Stripe webhook)
-- `.cursor/rules/` — Project rules (local only; not committed to the repo)
-- `.cursor/skills/` — Reusable skills (agent-frontend, content-orchestrator, etc.)
+MaaS is a prototype SaaS that identifies high-impact content and KOLs (Key Opinion Leaders) to help early-stage SaaS teams choose channels, angles and creators that convert. The repo contains a React frontend (landing, onboarding, dashboard) and a Node.js backend with extraction/orchestration endpoints.
 
-## Environment
+Deployment domain
 
-Copy `.env.example` to `.env` and set:
+The intended production domain for the landing and app is: maa-s.vercel.app
 
-- `PORT` — Backend port (default 3001)
+Quick overview
+
+- Landing: single-CTA focused on conversion. Onboarding: short survey that feeds personalized dashboard suggestions. Dashboard: prioritized actionable insights (what content worked, which KOLs convert, ROI signals). Missing data is shown as “Coming soon”.
+
+Tech stack (strict minimal)
+
+- Frontend: React + Vite + Tailwind
+- Backend: Node.js + Express
+- Storage/analytics: Supabase (optional)
+- Hosting: Vercel (frontend) + optional server on Node (backend)
+
+What to know before running
+
+- Copy `.env.example` to `.env` and populate required keys when you need real integrations. The repository intentionally ignores `.env` — do NOT commit secrets. If secrets were ever committed, rotate them immediately.
+
+Minimal environment variables (examples in `.env.example`):
+
+- `PORT` — backend port
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` — Supabase (optional)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — Stripe (optional)
 
-Without these, the app runs with mock auth and sample data.
+Run locally
 
-## Deploy (Vercel)
+Install and run both frontend and backend from the repository root:
 
-The repo includes a `vercel.json` that builds the frontend and rewrites all routes to `index.html` for the SPA. Deploy from the root; set **Root Directory** to the repo root and use the default build/output from `vercel.json`.
+```bash
+npm install
+npm run start
+```
 
-## License
+Open http://localhost:5173 to view the frontend. The app falls back to mocked/sample data when integrations are not configured.
 
-Private. All rights reserved.
+Notes on APIs & next steps
+
+- The backend contains connectors for X (Twitter), YouTube, LinkedIn, Meta/TikTok and others under `backend/services/`. Each connector expects API keys in environment variables. See the docs folder for integration links.
+- Missing or rate-limited data is shown as “Coming soon” on the dashboard; the frontend already contains placeholders for these states.
+- Required later: hourly availability checker to remove content that disappeared from source platforms, KOL country-based grouping and influence-based ranking (implemented in the frontend as filters/sorting but requires backend data).
+
+Vision (short)
+
+Automate campaign discovery and content generation via AI agents that can propose, test and optimize creator-driven campaigns with minimal human oversight. Keep the product focused on actionable copy/angles and creator matching that actually drives conversions.
+
+If you want, I can now:
+
+- Add an infra diagram and a short deploy checklist for Vercel + Supabase.
+- Implement the backend endpoint skeletons required by the dashboard filters and hourly checker.
+
+—
+Small, actionable README to help contributors get started.
