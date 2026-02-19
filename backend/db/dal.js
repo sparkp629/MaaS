@@ -136,6 +136,34 @@ export function getKolMetrics(platform = null) {
   return db.prepare('SELECT * FROM kol_metrics ORDER BY fetched_at DESC').all();
 }
 
+// --- Contents tracking ---
+export function upsertContent({ platform, platformContentId = null, url = null, extra = null }) {
+  const db = getDb();
+  const existing = db.prepare('SELECT id FROM contents WHERE platform = ? AND platform_content_id = ?').get(platform, platformContentId);
+  if (existing) {
+    db.prepare('UPDATE contents SET url = ?, extra_json = ?, last_checked_at = datetime(\'now\') WHERE id = ?').run(url, extra ? JSON.stringify(extra) : null, existing.id);
+    return { id: existing.id, updated: true };
+  }
+  const result = db.prepare('INSERT INTO contents (platform, platform_content_id, url, extra_json) VALUES (?, ?, ?, ?)').run(platform, platformContentId, url, extra ? JSON.stringify(extra) : null);
+  return { id: result.lastInsertRowid, updated: false };
+}
+
+export function getContentsToCheck(limit = 100) {
+  const db = getDb();
+  return db.prepare('SELECT * FROM contents WHERE status = "available" ORDER BY last_checked_at IS NULL DESC, last_checked_at ASC LIMIT ?').all(limit);
+}
+
+export function markContentUnavailable(id, reason = null) {
+  const db = getDb();
+  db.prepare('UPDATE contents SET status = "unavailable", last_checked_at = datetime(\'now\'), extra_json = json(?) WHERE id = ?').run(reason ? JSON.stringify({ reason }) : null, id);
+}
+
+export function markContentChecked(id, ok = true, info = null) {
+  const db = getDb();
+  const status = ok ? 'available' : 'unavailable';
+  db.prepare('UPDATE contents SET status = ?, last_checked_at = datetime(\'now\'), extra_json = json(?) WHERE id = ?').run(status, info ? JSON.stringify(info) : null, id);
+}
+
 // --- Tracking (clics/impressions réels) ---
 
 export function trackClick(campaignId, kolId, source) {

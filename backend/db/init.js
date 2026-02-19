@@ -97,5 +97,18 @@ function initSchema(db) {
       fetched_at TEXT DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_kol_platform ON kol_metrics(platform, platform_user_id);
+    
+    -- Stored external contents (posts, videos, threads) to monitor availability
+    CREATE TABLE IF NOT EXISTS contents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      platform TEXT NOT NULL,
+      platform_content_id TEXT,
+      url TEXT,
+      status TEXT DEFAULT 'available', -- available | unavailable
+      last_checked_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      extra_json TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_contents_platform ON contents(platform, platform_content_id);
   `);
 }

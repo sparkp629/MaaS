@@ -2,19 +2,43 @@
 // Exports a checkOnce() function and startScheduler() to run periodically.
 
 import { setInterval as setIntervalFn } from 'timers';
+import { getContentsToCheck, markContentUnavailable, markContentChecked } from '../db/dal.js';
 
 export async function checkOnce({ dbClient = null } = {}) {
   // dbClient: optional database client to query stored posts/content
   // This skeleton logs the action and returns a result object.
   console.log('[availabilityChecker] Running single availability check');
+  // Determine contents to check from DB
+  const toCheck = getContentsToCheck(200);
+  let checked = 0;
+  let removed = 0;
 
-  // TODO: implement provider-specific availability checks:
-  // - For each stored post record: call provider API (YouTube, X, TikTok, Meta) to verify status
-  // - If content not found or removed, mark as unavailable in DB and optionally remove
-  // - Respect rate limits, backoff and quota configuration
+  for (const row of toCheck) {
+    checked += 1;
+    const url = row.url;
+    if (!url) {
+      markContentUnavailable(row.id, 'missing_url');
+      removed += 1;
+      continue;
+    }
 
-  // Return a minimal structure useful for tests and health endpoints
-  return { ok: true, checked: 0, removed: 0 };
+    try {
+      const resp = await fetch(url, { method: 'HEAD', redirect: 'follow', timeout: 10000 });
+      if (!resp.ok) {
+        console.log(`[availabilityChecker] Content ${row.id} -> ${url} returned ${resp.status}`);
+        markContentUnavailable(row.id, `http_${resp.status}`);
+        removed += 1;
+      } else {
+        markContentChecked(row.id, true, { status: resp.status });
+      }
+    } catch (err) {
+      console.warn(`[availabilityChecker] Error checking ${row.id} ${url}:`, err && err.message ? err.message : err);
+      // On network error, don't immediately mark unavailable; record attempt
+      markContentChecked(row.id, true, { error: String(err && err.message ? err.message : err) });
+    }
+  }
+
+  return { ok: true, checked, removed };
 }
 
 let _interval = null;
