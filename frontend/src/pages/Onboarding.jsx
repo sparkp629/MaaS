@@ -79,12 +79,6 @@ const STEPS = [
           'X (Twitter)', 'LinkedIn', 'YouTube', 'Newsletter', 'No preference',
         ],
       },
-      {
-        id: 'campaign_goal',
-        label: 'Main goal of your next campaign (one sentence)',
-        type: 'open',
-        placeholder: 'e.g. visibility, leads, conversions, awareness',
-      },
     ],
   },
   {

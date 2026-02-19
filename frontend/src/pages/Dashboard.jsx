@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, ExternalLink, Sparkles, Lock, ChevronDown, Eye, MousePointerClick, ArrowUpRight, ArrowDownRight, Lightbulb, Megaphone, CalendarClock } from 'lucide-react';
+import { Users, ExternalLink, Sparkles, Lock, ChevronDown, Eye, MousePointerClick, ArrowUpRight, ArrowDownRight, TrendingUp, Lightbulb, Megaphone, CalendarClock } from 'lucide-react';
 import { api } from '../api';
 import NetworkIcon, { NETWORKS } from '../components/NetworkIcons';
 import MindshareGauge from '../components/MindshareGauge';
@@ -12,22 +12,30 @@ const PERIODS = [
   { key: 'annually', label: 'Annually' },
 ];
 
-function PeriodSelector({ active, onChange }) {
+function PeriodSelector({ active, onChange, apiStatus }) {
   return (
     <div className="flex bg-slate-800/50 rounded-lg p-0.5">
-      {PERIODS.map((p) => (
-        <button
-          key={p.key}
-          onClick={() => onChange(p.key)}
-          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            active === p.key
-              ? 'bg-indigo-500/20 text-indigo-300'
-              : 'text-slate-500 hover:text-slate-300'
-          }`}
-        >
-          {p.label}
-        </button>
-      ))}
+      {PERIODS.map((p) => {
+        const isPremium = p.key === 'monthly' || p.key === 'annually';
+        const disabled = isPremium && !apiStatus?.premium;
+        return (
+          <button
+            key={p.key}
+            onClick={() => !disabled && onChange(p.key)}
+            disabled={disabled}
+            title={disabled ? 'Available in Premium plan' : ''}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+              active === p.key
+                ? 'bg-indigo-500/20 text-indigo-300'
+                : disabled
+                ? 'text-slate-600 cursor-not-allowed opacity-60'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            {p.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -366,6 +374,25 @@ function KOLCard({ kol, activeNetwork }) {
               <span className="text-amber-400 font-semibold text-sm">{kol.engagementRate ?? '—'}</span>
             </div>
           </div>
+
+          {Array.isArray(kol.externalLinks) && kol.externalLinks.length > 0 && (
+            <div className="mt-3 p-2 rounded-lg bg-slate-900/40">
+              <span className="text-slate-500 block text-xs mb-1">Liens profil détectés</span>
+              <div className="flex flex-wrap gap-1.5">
+                {kol.externalLinks.slice(0, 3).map((link) => (
+                  <a
+                    key={link}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-indigo-300 hover:text-indigo-200 underline underline-offset-2 break-all"
+                  >
+                    {link}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: network content preview (enlarged) */}
@@ -399,24 +426,22 @@ function IntelligenceSection({ segments, competitors, roi, period }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
           <h3 className="text-sm font-medium text-indigo-400 mb-3">High-demand segments</h3>
-          <div className="space-y-1.5">
-            {(segments || [
-              { id: 1, name: 'Dev Tools', demand: 87 },
-              { id: 2, name: 'No-code', demand: 74 },
-              { id: 3, name: 'API-first', demand: 68 },
-              { id: 4, name: 'CRM niche', demand: 52 },
-              { id: 5, name: 'Analytics', demand: 45 },
-            ]).map((s) => (
-              <div key={s.id || s.name} className="flex items-center justify-between py-1.5 border-b border-slate-800/50 last:border-0">
-                <span className="text-slate-300 text-sm">{s.name}</span>
-                <span className={`text-sm font-semibold ${
-                  s.demand >= 70 ? 'text-emerald-400' : s.demand >= 50 ? 'text-amber-400' : 'text-red-400'
-                }`}>
-                  {s.demand}
-                </span>
-              </div>
-            ))}
-          </div>
+          {segments?.length > 0 ? (
+            <div className="space-y-1.5">
+              {segments.map((s) => (
+                <div key={s.id || s.name} className="flex items-center justify-between py-1.5 border-b border-slate-800/50 last:border-0">
+                  <span className="text-slate-300 text-sm">{s.name}</span>
+                  <span className={`text-sm font-semibold ${
+                    s.demand >= 70 ? 'text-emerald-400' : s.demand >= 50 ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {s.demand}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-500 text-sm">Aucune donnée réelle disponible</p>
+          )}
         </div>
 
         <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
@@ -461,6 +486,8 @@ export default function Dashboard() {
   const [activeNetwork, setActiveNetwork] = useState(null);
   const [period, setPeriod] = useState('weekly');
   const [showMore, setShowMore] = useState(false);
+  const [countryFilter, setCountryFilter] = useState([]);
+  const [sortBy, setSortBy] = useState('influence');
 
   useEffect(() => {
     Promise.all([
@@ -489,13 +516,40 @@ export default function Dashboard() {
 
   const visibleKols = showMore ? kols.slice(0, 10) : kols.slice(0, 5);
   const hasMore = kols.length > 5 && !showMore;
+  // derive countries from KOLs
+  const countries = useMemo(() => {
+    const set = new Set();
+    (kols || []).forEach((k) => { if (k.country) set.add(k.country); });
+    return Array.from(set).sort();
+  }, [kols]);
+
+  // apply country filter and sorting
+  const filteredKols = useMemo(() => {
+    let list = kols || [];
+    if (countryFilter.length > 0) {
+      list = list.filter((k) => countryFilter.includes(k.country));
+    }
+    if (sortBy === 'influence') {
+      list = list.slice().sort((a, b) => {
+        const ai = (a.mindshareIndex || 0) + (a.conversionScore || 0);
+        const bi = (b.mindshareIndex || 0) + (b.conversionScore || 0);
+        return bi - ai;
+      });
+    } else if (sortBy === 'followers') {
+      list = list.slice().sort((a, b) => (b.followers || 0) - (a.followers || 0));
+    }
+    return list;
+  }, [kols, countryFilter, sortBy]);
+
+  const visibleFilteredKols = showMore ? filteredKols.slice(0, 10) : filteredKols.slice(0, 5);
+  const hasMoreFiltered = filteredKols.length > (showMore ? 10 : 5) && !showMore;
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header with period selector */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-white">Dashboard</h1>
-        <PeriodSelector active={period} onChange={setPeriod} />
+        <PeriodSelector active={period} onChange={setPeriod} apiStatus={apiStatus} />
       </div>
 
       {/* Top stats row */}
@@ -515,7 +569,30 @@ export default function Dashboard() {
 
       {/* Network filter + title */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-sm font-medium text-slate-300">KOL Discovery</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-sm font-medium text-slate-300">KOL Discovery</h2>
+          <div className="text-[13px] text-slate-400">Filter by country:</div>
+          <div className="flex items-center gap-2">
+            {countries.length > 0 ? (
+              countries.map((c) => (
+                <label key={c} className="flex items-center gap-2 text-xs text-slate-300">
+                  <input type="checkbox" className="accent-indigo-500" value={c} checked={countryFilter.includes(c)} onChange={(e) => {
+                    const val = e.target.value;
+                    setCountryFilter((prev) => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]);
+                  }} />
+                  {c}
+                </label>
+              ))
+            ) : (
+              <span className="text-xs text-slate-500">Coming soon</span>
+            )}
+          </div>
+          <div className="ml-4 text-xs text-slate-400">Sort:</div>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="text-xs bg-slate-800/40 rounded-md px-2 py-1">
+            <option value="influence">Influence / Relevance</option>
+            <option value="followers">Followers</option>
+          </select>
+        </div>
         <NetworkFilters active={activeNetwork} onChange={setActiveNetwork} />
       </div>
 
@@ -524,9 +601,9 @@ export default function Dashboard() {
       <ChannelAvailabilitySection apiStatus={apiStatus} />
 
       {/* KOL cards — top 5, then "More" for next 5 */}
-      {visibleKols.length > 0 ? (
+      {visibleFilteredKols.length > 0 ? (
         <div className="space-y-4">
-          {visibleKols.map((k) => (
+          {visibleFilteredKols.map((k) => (
             <KOLCard key={k.id} kol={k} activeNetwork={activeNetwork} />
           ))}
         </div>
@@ -535,14 +612,13 @@ export default function Dashboard() {
           Coming soon
         </div>
       )}
-
-      {hasMore && (
+      {hasMoreFiltered && (
         <button
           onClick={() => setShowMore(true)}
           className="w-full py-2.5 rounded-xl bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors text-sm flex items-center justify-center gap-2"
         >
           <ChevronDown className="w-4 h-4" />
-          Show more KOLs ({kols.length - 5} remaining)
+          Show more KOLs ({filteredKols.length - (showMore ? 10 : 5)} remaining)
         </button>
       )}
 

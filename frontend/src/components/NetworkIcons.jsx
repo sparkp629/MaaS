@@ -84,6 +84,36 @@ export const NETWORKS = {
       </svg>
     ),
   },
+  reddit: {
+    name: 'Reddit',
+    color: '#FF4500',
+    bg: 'bg-[#FF4500]',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+        <path d="M22 12.5c0-1.1-.9-2-2-2-.7 0-1.3.4-1.7.9-1.1-.6-2.4-1-3.8-1.1l1.1-4.3 3 .7V6h2v6.5zM7.5 10.5C5.6 10.5 4 12.1 4 14s1.6 3.5 3.5 3.5S11 15.9 11 14 9.4 10.5 7.5 10.5zM12 17c0 1.4-2 2.5-4.5 2.5S3 18.4 3 17s2-2.5 4.5-2.5S12 15.6 12 17z" />
+      </svg>
+    ),
+  },
+  telegram: {
+    name: 'Telegram',
+    color: '#2AABEE',
+    bg: 'bg-[#2AABEE]',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+        <path d="M21.5 2.5L2.5 10.5l4.8 1.9L11 8.8l10.5-6.3zM7.2 13.6l9.7-6.1-7.4 9.1-2.3-3z" />
+      </svg>
+    ),
+  },
+  discord: {
+    name: 'Discord',
+    color: '#5865F2',
+    bg: 'bg-[#5865F2]',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+        <path d="M20 4l-1.5 1.2C16.9 5.1 14.6 4.6 12 4.6s-4.9.5-6.5.6L4 4c-2 2-2 5-2 8v2c0 3 1 6 4 6l1-1.5c2 1.5 5 2.5 8 2.5s6-1 8-2.5L20 20c3 0 4-3 4-6v-2c0-3 0-6-2-8z" />
+      </svg>
+    ),
+  },
 };
 
 export default function NetworkIcon({ network, size = 'md', className = '' }) {

@@ -2,6 +2,7 @@ import { Link, Outlet } from 'react-router-dom';
 import { LogOut, Github } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import SuggestionBox from './SuggestionBox';
+import SocialIcons from './SocialIcons';
 
 export default function Layout() {
   const { user, login, logout, isLoggedIn } = useAuth();
@@ -77,6 +78,9 @@ export default function Layout() {
 
       <footer className="border-t border-slate-700/30 px-6 py-6 shrink-0">
         <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-end mb-3">
+            <SocialIcons />
+          </div>
           <SuggestionBox />
           <p className="text-slate-500 text-xs mt-3">
             MaaS — Remplacez les métriques vanité par un suivi de conversion.
