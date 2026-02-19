@@ -1,7 +1,15 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import express from 'express';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+// Charger .env du backend, puis .env à la racine du repo (monorepo)
+dotenv.config();
+dotenv.config({ path: join(__dirname, '..', '.env') });
 import cors from 'cors';
 import { apiRouter } from './routes/api.js';
+import { initAwsSecrets } from './services/awsSecrets.js';
 import { stripeWebhookRouter } from './routes/stripeWebhook.js';
 
 const PORT = process.env.PORT || 3001;
@@ -17,6 +25,9 @@ app.use(express.json());
 app.use('/api', apiRouter);
 
 app.get('/health', (_, res) => res.json({ ok: true }));
+
+// Initialize secrets (AWS Secrets Manager) before starting the server
+await initAwsSecrets();
 
 const server = app.listen(PORT, () => {
   console.log(`[MaaS Backend] OK — listening on port ${PORT}`);
