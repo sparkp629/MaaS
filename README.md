@@ -1,13 +1,13 @@
 # MaaS
 
-## Proposition de valeur centrale
-MaaS aide les équipes marketing et produit à transformer le bruit social en décisions rentables. La plateforme identifie les créateurs réellement performants sur X et Twitch, détecte les signaux d’intention d’achat, relie les contenus aux résultats commerciaux, puis propose les actions prioritaires à lancer pour gagner plus vite en visibilité, en confiance et en revenus.
+## Core Value Proposition
+MaaS is an intelligence platform built for growth teams that need measurable outcomes from creator marketing. It identifies high-pertinence creators by real influence and commercial relevance, reveals which content patterns convert, and connects actions to business results through clear attribution signals.
 
-## Vue d’ensemble de l’infrastructure
-MaaS repose sur une architecture en trois couches :
-1. **Interface utilisateur** : une application web unique pour l’inscription, le parcours guidé, le tableau de bord, la découverte de créateurs et la lecture des signaux de marché.
-2. **Cœur applicatif** : une couche serveur qui orchestre les sources externes, calcule les indicateurs de performance, applique les règles de qualité des données (vérification régulière des liens, marquage des contenus supprimés), protège les quotas d’extraction et alimente les vues en quasi temps réel.
-3. **Couche données et sécurité** : un stockage persistant des indicateurs, des événements d’attribution et de l’historique d’analyse, renforcé par l’authentification obligatoire via X, le contrôle anti multi-comptes, et des garde-fous contre les adresses de messagerie jetables.
+## High-Level Infrastructure Overview
+MaaS operates through three coordinated layers:
+1. **Experience layer**: a single web interface for guided onboarding, secure sign-in, creator discovery, and decision-ready dashboards.
+2. **Decision layer**: a server orchestration layer that aggregates source signals, computes mindshare and conversion indicators, enforces extraction quotas, and applies resilient data hygiene with hourly verification, caching, batching, and censorship detection.
+3. **Trust and memory layer**: persistent storage for creator metrics, campaign events, and intelligence history, secured with required X authentication, anti-disposable email controls, and anti-multi-account safeguards.
 
-## Vision future
-La vision cible est une plateforme dirigée par des agents d’intelligence artificielle totalement autonomes. À terme, ces agents pilotent la prospection, la qualification des créateurs, l’analyse concurrentielle, la génération de plans d’action, l’optimisation budgétaire, le contrôle de conformité, la priorisation quotidienne, et l’exécution multi-canal de bout en bout sans intervention humaine, avec supervision stratégique minimale.
+## Future Vision
+MaaS is designed to evolve toward a fully autonomous operation model powered by artificial intelligence agents. In this target state, specialized agents continuously handle creator scouting, qualification, competitive analysis, budget allocation, content planning, compliance checks, and execution loops across channels, while human teams focus on strategic supervision and business direction.

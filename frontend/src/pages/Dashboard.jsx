@@ -94,14 +94,14 @@ function NetworkFilters({ active, onChange }) {
 
 function KOLCard({ kol, activeNetwork, apiStatus }) {
   const selectedNetwork = activeNetwork || kol.primaryNetwork || 'twitter';
+  const preview = kol.previews?.[selectedNetwork] || null;
+
   const isUnavailable =
     (selectedNetwork === 'twitter' && !apiStatus?.x) ||
     (selectedNetwork === 'youtube' && !apiStatus?.youtube) ||
     (selectedNetwork === 'linkedin' && !apiStatus?.linkedin) ||
     (selectedNetwork === 'tiktok' && !apiStatus?.tiktok) ||
     (selectedNetwork === 'instagram' && !apiStatus?.meta);
-
-  const preview = kol.previews?.[selectedNetwork] || null;
 
   return (
     <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30">
@@ -115,11 +115,17 @@ function KOLCard({ kol, activeNetwork, apiStatus }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-3">
             <div className="p-2 rounded-lg bg-slate-900/40"><span className="text-slate-500 block">Followers</span><span className="text-white font-semibold">{(kol.followers || 0).toLocaleString()}</span></div>
             <div className="p-2 rounded-lg bg-slate-900/40"><span className="text-slate-500 block">Mindshare</span><span className="text-indigo-400 font-semibold">{kol.mindshareIndex ?? 0}/100</span></div>
             <div className="p-2 rounded-lg bg-slate-900/40"><span className="text-slate-500 block">Conv. Score</span><span className="text-emerald-400 font-semibold">{kol.conversionScore ?? 0}/100</span></div>
             <div className="p-2 rounded-lg bg-slate-900/40"><span className="text-slate-500 block">Eng. Rate</span><span className="text-amber-400 font-semibold">{kol.engagementRate || 'Coming soon'}</span></div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-[11px]">
+            <span className="px-2 py-1 rounded-full bg-indigo-500/15 text-indigo-200">Subject: {kol.contentPattern?.subject || 'Coming soon'}</span>
+            <span className="px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-200">Format: {kol.contentPattern?.format || 'Coming soon'}</span>
+            <span className="px-2 py-1 rounded-full bg-amber-500/15 text-amber-200">Tone: {kol.contentPattern?.tone || 'Coming soon'}</span>
           </div>
         </div>
 
@@ -149,20 +155,30 @@ export default function Dashboard() {
   const [showMore, setShowMore] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('All countries');
   const [showRedditPreview, setShowRedditPreview] = useState(false);
-  const [data, setData] = useState(null);
+
+  const [data, setData] = useState({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } });
   const [kols, setKols] = useState([]);
   const [roi, setRoi] = useState(null);
   const [intelligence, setIntelligence] = useState(null);
   const [apiStatus, setApiStatus] = useState(null);
+  const [hygiene, setHygiene] = useState(null);
 
   useEffect(() => {
-    Promise.all([api.getDashboard(), api.getKOLs(), api.getRoi(), api.getIntelligence(), api.getApiStatus()])
-      .then(([dashboard, kolList, roiData, intel, status]) => {
-        setData(dashboard);
+    Promise.all([
+      api.getDashboard(),
+      api.getKOLs(),
+      api.getRoi(),
+      api.getIntelligence(),
+      api.getApiStatus(),
+      api.getHygieneStatus(),
+    ])
+      .then(([dashboard, kolList, roiData, intel, status, hygieneStatus]) => {
+        setData(dashboard || { kolCount: 0, mindshare: { value: 0, level: 'Invisible' } });
         setKols(kolList || []);
-        setRoi(roiData);
-        setIntelligence(intel);
+        setRoi(roiData || null);
+        setIntelligence(intel || null);
         setApiStatus(status || null);
+        setHygiene(hygieneStatus || null);
       })
       .catch(() => {
         setData({ kolCount: 0, mindshare: { value: 0, level: 'Invisible' } });
@@ -170,19 +186,19 @@ export default function Dashboard() {
       });
   }, []);
 
-  const countries = useMemo(() => ['All countries', ...new Set(kols.map((k) => k.country || 'Unknown'))], [kols]);
+  const countries = useMemo(() => ['All countries', ...new Set(kols.map((kol) => kol.country || 'Unknown'))], [kols]);
 
   const filteredKols = useMemo(() => {
-    return kols.filter((k) => {
-      const okCountry = selectedCountry === 'All countries' || (k.country || 'Unknown') === selectedCountry;
-      const okNetwork = !activeNetwork || k.previews?.[activeNetwork];
-      return okCountry && okNetwork;
+    return kols.filter((kol) => {
+      const countryOk = selectedCountry === 'All countries' || (kol.country || 'Unknown') === selectedCountry;
+      const networkOk = !activeNetwork || kol.previews?.[activeNetwork];
+      return countryOk && networkOk;
     });
   }, [kols, selectedCountry, activeNetwork]);
 
   const visibleKols = showMore ? filteredKols.slice(0, 12) : filteredKols.slice(0, 5);
-  const countryCount = new Set(filteredKols.map((k) => k.country)).size;
-  const nicheCount = new Set(filteredKols.map((k) => k.niche)).size;
+  const countryCount = new Set(filteredKols.map((kol) => kol.country)).size;
+  const nicheCount = new Set(filteredKols.map((kol) => kol.niche)).size;
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -214,17 +230,25 @@ export default function Dashboard() {
         {filteredKols.length} converting KOLs across {countryCount} countries and {nicheCount} high-intent niches.
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <label className="text-sm text-slate-400">Country</label>
         <select
           className="bg-slate-800/70 border border-slate-700/40 rounded-lg px-3 py-2 text-sm text-white"
           value={selectedCountry}
-          onChange={(e) => setSelectedCountry(e.target.value)}
+          onChange={(event) => setSelectedCountry(event.target.value)}
         >
           {countries.map((country) => (
             <option key={country} value={country}>{country}</option>
           ))}
         </select>
+
+        {hygiene?.hourlyVerification?.enabled ? (
+          <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-300">
+            Hourly verification active
+          </span>
+        ) : (
+          <span className="text-xs px-2 py-1 rounded-full bg-amber-500/10 text-amber-300">Coming soon</span>
+        )}
       </div>
 
       {visibleKols.length > 0 ? (
@@ -264,17 +288,18 @@ export default function Dashboard() {
           <button className="rounded-lg px-3 py-2 bg-[#9146FF] text-white text-sm flex items-center gap-2"><Twitch className="w-4 h-4" /> Twitch</button>
           <button className="rounded-lg px-3 py-2 bg-slate-700 text-white text-sm flex items-center gap-2"><Github className="w-4 h-4" /> GitHub</button>
           <button
-            onClick={() => setShowRedditPreview((v) => !v)}
+            onClick={() => setShowRedditPreview((value) => !value)}
             className="rounded-lg px-3 py-2 bg-[#FF4500] text-white text-sm flex items-center gap-2"
           >
             <BadgeAlert className="w-4 h-4" /> Reddit
           </button>
         </div>
+
         {showRedditPreview && (
           <div className="mt-3 rounded-xl border border-slate-700/50 bg-slate-900/40 p-3 space-y-2">
             <p className="text-xs text-slate-400">Preview of solved high-value closed-topic discussions</p>
-            <div className="text-sm text-slate-200">• "Reduced CAC by 37% in 3 weeks": full post highlights on audience mismatch and test cadence.</div>
-            <div className="text-sm text-slate-200">• "Churn drop with onboarding rewrites": full post extract shows tone/format that converted.</div>
+            <div className="text-sm text-slate-200">• Reduced CAC by 37% in 3 weeks: audience mismatch fixed with creator-topic realignment.</div>
+            <div className="text-sm text-slate-200">• Churn drop from onboarding rewrite: tone changed from technical to outcome-first proof.</div>
           </div>
         )}
       </div>

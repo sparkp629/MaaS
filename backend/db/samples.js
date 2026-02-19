@@ -1,6 +1,5 @@
 /**
  * Données d'exemple pour développement (sans DB)
- * À remplacer par Supabase/SQLite en prod
  */
 
 import { computeMultiChannelMI } from '../services/mindshareIndex.js';
@@ -8,111 +7,70 @@ import { computeConversionScore } from '../services/kolScoring.js';
 
 const RAW_KOLS = [
   {
-    id: '1',
-    handle: '@devtools_sarah',
-    displayName: 'Sarah Chen',
-    followers: 7200,
-    niche: 'Dev Tools',
-    country: 'United States',
-    primaryNetwork: 'twitter',
+    id: '1', handle: '@devtools_sarah', displayName: 'Sarah Chen', followers: 7200,
+    niche: 'Dev Tools', country: 'United States', primaryNetwork: 'twitter',
     avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
     twitter: { impressions: 15000, engagementRate: 6.2 },
-    twitterPost: 'Cut CI time by 40% using parallel jobs and smart caching. Full stack and measurable results in production.',
+    twitterPost: 'CI reduced by 40% with concrete deployment proof and conversion tracking.',
     linkedin: { impressions: 5000, engagementRate: 3.5 },
-    linkedinPost: '5 lessons from scaling a dev tool from 0 to 10k users.',
-    mentions: 18,
-    sentiment: 72,
-    technicalSentiment: 85,
-    growthVelocity: 4.2,
+    linkedinPost: '5 lessons from 0 to 10k users using founder-led content.',
+    mentions: 18, sentiment: 72, technicalSentiment: 85, growthVelocity: 4.2,
+    patternSubject: 'Proof-based founder narrative', patternFormat: 'Thread + screenshot', patternTone: 'Pragmatic',
   },
   {
-    id: '2',
-    handle: '@nocode_alex',
-    displayName: 'Alex Rivera',
-    followers: 4500,
-    niche: 'No-code',
-    country: 'France',
-    primaryNetwork: 'youtube',
+    id: '2', handle: '@nocode_alex', displayName: 'Alex Rivera', followers: 4500,
+    niche: 'No-code', country: 'France', primaryNetwork: 'youtube',
     avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
     twitter: { impressions: 8000, engagementRate: 8.1 },
-    twitterPost: 'How I built a profitable app in two weeks without code, with revenue proof and retention numbers.',
+    twitterPost: 'Built a profitable app in two weeks, with retention breakdown and acquisition cost details.',
     youtube: { views: 19000 },
-    youtubePost: 'Case study: launch timeline, acquisition channels, and conversion stack.',
-    mentions: 8,
-    sentiment: 65,
-    technicalSentiment: 60,
-    growthVelocity: 7.5,
+    youtubePost: 'Launch timeline, attribution map, and repeatable growth loop.',
+    mentions: 8, sentiment: 65, technicalSentiment: 60, growthVelocity: 7.5,
+    patternSubject: 'Before/after business outcome', patternFormat: 'Short case video', patternTone: 'Direct',
   },
   {
-    id: '3',
-    handle: '@api_first',
-    displayName: 'Jordan Kim',
-    followers: 12000,
-    niche: 'API-first',
-    country: 'Japan',
-    primaryNetwork: 'linkedin',
+    id: '3', handle: '@api_first', displayName: 'Jordan Kim', followers: 12000,
+    niche: 'API-first', country: 'Japan', primaryNetwork: 'linkedin',
     avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan',
     twitter: { impressions: 45000, engagementRate: 4.1 },
-    twitterPost: 'API design: predictable versioning keeps operations stable and decreases support tickets.',
+    twitterPost: 'Predictable versioning lowered support burden and improved partner activation.',
     linkedin: { impressions: 12000, engagementRate: 2.1 },
-    linkedinPost: 'Pragmatic API architecture after 50+ integrations.',
-    mentions: 32,
-    sentiment: 78,
-    technicalSentiment: 90,
-    growthVelocity: 2.1,
+    linkedinPost: 'Pragmatic architecture lessons after 50+ integrations.',
+    mentions: 32, sentiment: 78, technicalSentiment: 90, growthVelocity: 2.1,
+    patternSubject: 'Risk reduction strategy', patternFormat: 'Long expert post', patternTone: 'Educational',
   },
   {
-    id: '4',
-    handle: '@streamgrowth_mina',
-    displayName: 'Mina Park',
-    followers: 9600,
-    niche: 'Gaming analytics',
-    country: 'South Korea',
-    primaryNetwork: 'twitch',
+    id: '4', handle: '@streamgrowth_mina', displayName: 'Mina Park', followers: 9600,
+    niche: 'Gaming analytics', country: 'South Korea', primaryNetwork: 'twitch',
     avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mina',
     twitter: { impressions: 10200, engagementRate: 5.4 },
-    twitterPost: 'Livestream conversion templates for sponsorship workflows.',
-    mentions: 24,
-    sentiment: 70,
-    technicalSentiment: 74,
-    growthVelocity: 5.9,
+    twitterPost: 'Livestream sponsorship workflows with direct conversion prompts.',
+    twitchPost: 'Live teardown of sponsor placement that improved checkout rate.',
+    mentions: 24, sentiment: 70, technicalSentiment: 74, growthVelocity: 5.9,
+    patternSubject: 'Live proof loop', patternFormat: 'Live stream + clip', patternTone: 'Energetic',
   },
   {
-    id: '5',
-    handle: '@growthlena',
-    displayName: 'Lena Costa',
-    followers: 15000,
-    niche: 'B2B demand generation',
-    country: 'Brazil',
-    primaryNetwork: 'twitter',
+    id: '5', handle: '@growthlena', displayName: 'Lena Costa', followers: 15000,
+    niche: 'B2B demand generation', country: 'Brazil', primaryNetwork: 'twitter',
     avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lena',
     twitter: { impressions: 32000, engagementRate: 4.9 },
-    twitterPost: 'How to build reliable attribution loops for creator partnerships.',
-    mentions: 27,
-    sentiment: 75,
-    technicalSentiment: 81,
-    growthVelocity: 5.2,
+    twitterPost: 'Attribution loops for creator partnerships that lowered wasted spend.',
+    mentions: 27, sentiment: 75, technicalSentiment: 81, growthVelocity: 5.2,
+    patternSubject: 'Cost-saving narrative', patternFormat: 'Step list', patternTone: 'Executive',
   },
   {
-    id: '6',
-    handle: '@adriankpi',
-    displayName: 'Adrian Novak',
-    followers: 6100,
-    niche: 'Newsletter growth',
-    country: 'Germany',
-    primaryNetwork: 'newsletter',
+    id: '6', handle: '@adriankpi', displayName: 'Adrian Novak', followers: 6100,
+    niche: 'Newsletter growth', country: 'Germany', primaryNetwork: 'newsletter',
     avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Adrian',
     twitter: { impressions: 7400, engagementRate: 3.8 },
-    twitterPost: 'Newsletter segmentation for intent-based conversion improvements.',
-    mentions: 12,
-    sentiment: 68,
-    technicalSentiment: 71,
-    growthVelocity: 4.5,
+    twitterPost: 'Intent segmentation increased qualified replies and meetings booked.',
+    mentions: 12, sentiment: 68, technicalSentiment: 71, growthVelocity: 4.5,
+    patternSubject: 'Intent segmentation', patternFormat: 'Issue + call to action', patternTone: 'Methodical',
   },
 ];
 
 export function getSampleKOLs() {
-  return RAW_KOLS.map((raw) => {
+  const hydrated = RAW_KOLS.map((raw) => {
     const mi = computeMultiChannelMI({
       twitter: raw.twitter,
       newsletter: raw.newsletter,
@@ -128,6 +86,8 @@ export function getSampleKOLs() {
       engagementRate: raw.twitter?.engagementRate,
     });
 
+    const influenceScore = Math.round((mi.value * 0.45) + (conv.value * 0.45) + ((raw.twitter?.engagementRate || 0) * 1.2));
+
     return {
       id: raw.id,
       handle: raw.handle,
@@ -140,21 +100,39 @@ export function getSampleKOLs() {
       engagementRate: raw.twitter?.engagementRate ? `${raw.twitter.engagementRate}%` : null,
       conversionScore: conv.value,
       mindshareIndex: mi.value,
-      isMicroKOL: conv.isMicroKOL,
+      influenceScore,
+      contentPattern: {
+        subject: raw.patternSubject,
+        format: raw.patternFormat,
+        tone: raw.patternTone,
+      },
       previews: {
         twitter: raw.twitterPost ? { text: raw.twitterPost } : null,
         youtube: raw.youtubePost ? { text: raw.youtubePost } : null,
-        linkedin: raw.linkedinPost ? { text: raw.linkedinPost, status: raw.id === '3' ? 'censored' : 'ok', platformLabel: 'LinkedIn' } : null,
-        newsletter: raw.primaryNetwork === 'newsletter' ? { text: 'Weekly issue format and subject lines outperforming baseline CTR.' } : null,
+        twitch: raw.twitchPost ? { text: raw.twitchPost } : null,
+        linkedin: raw.linkedinPost ? {
+          text: raw.linkedinPost,
+          status: raw.id === '3' ? 'censored' : 'ok',
+          platformLabel: 'LinkedIn',
+        } : null,
+        newsletter: raw.primaryNetwork === 'newsletter'
+          ? { text: 'Weekly issue with problem-first framing and measurable call to action.' }
+          : null,
       },
     };
+  });
+
+  return hydrated.sort((a, b) => {
+    if (a.country !== b.country) return a.country.localeCompare(b.country);
+    return b.influenceScore - a.influenceScore;
   });
 }
 
 export function getDashboardSummary() {
   const kols = getSampleKOLs();
-  const avgMI = kols.length ? kols.reduce((s, k) => s + k.mindshareIndex, 0) / kols.length : 0;
+  const avgMI = kols.length ? kols.reduce((sum, kol) => sum + kol.mindshareIndex, 0) / kols.length : 0;
   const level = avgMI >= 80 ? 'Dominant' : avgMI >= 60 ? 'Strong' : avgMI >= 40 ? 'Growing' : avgMI >= 20 ? 'Emerging' : 'Invisible';
+
   return {
     kolCount: kols.length,
     campaigns: [],
