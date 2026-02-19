@@ -13,11 +13,15 @@ import { initAwsSecrets } from './services/awsSecrets.js';
 import { stripeWebhookRouter } from './routes/stripeWebhook.js';
 import { normalizeEnv } from './services/envNormalize.js';
 import { startScheduler } from './services/availabilityChecker.js';
+import accountProtection from './middleware/accountProtection.js';
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 
 app.use(cors({ origin: true }));
+
+// Lightweight account protection checks (disposable emails, missing fingerprint)
+app.use(accountProtection());
 
 // Stripe webhook AVANT express.json() — Stripe exige le raw body
 app.use('/api/webhook', stripeWebhookRouter);
