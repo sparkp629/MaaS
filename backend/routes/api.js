@@ -5,6 +5,7 @@ import {
   createSuggestion,
   getRoiSummary,
   upsertKolMetric,
+  upsertContent,
   getKolMetrics,
   trackClick,
   trackImpression,
@@ -353,6 +354,13 @@ router.post('/kol/fetch/x', async (req, res) => {
       subscribers: 0,
       extra: { tweetCount: data.tweetCount, avgImpressions: data.avgImpressions },
     });
+    // register profile URL for monitoring
+    try {
+      const profileUrl = data.handle ? `https://x.com/${data.handle.replace(/^@/, '')}` : null;
+      if (profileUrl) upsertContent({ platform: 'x', platformContentId: data.platformUserId, url: profileUrl, extra: { source: 'profile' } });
+    } catch (e) {
+      console.warn('[upsertContent] x profile insert failed', e && e.message ? e.message : e);
+    }
     res.json({ ...data, dbResult: result });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -386,6 +394,18 @@ router.post('/kol/fetch/youtube', async (req, res) => {
         channelUrl: data.channelUrl || null,
       },
     });
+    // register channel url and recent videos for monitoring
+    try {
+      const channelUrl = data.channelUrl || (data.handle ? `https://www.youtube.com/${data.handle.replace(/^@/, '')}` : null);
+      if (channelUrl) upsertContent({ platform: 'youtube', platformContentId: data.platformUserId, url: channelUrl, extra: { source: 'channel' } });
+      if (Array.isArray(data.recentVideos)) {
+        for (const v of data.recentVideos) {
+          if (v.videoId) upsertContent({ platform: 'youtube', platformContentId: `${data.platformUserId}:${v.videoId}`, url: `https://www.youtube.com/watch?v=${v.videoId}`, extra: { source: 'video' } });
+        }
+      }
+    } catch (e) {
+      console.warn('[upsertContent] youtube insert failed', e && e.message ? e.message : e);
+    }
     res.json({ ...data, dbResult: result });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -428,6 +448,13 @@ router.post('/kol/fetch/youtube/batch', async (req, res) => {
           channelUrl: data.channelUrl || null,
         },
       });
+      // register channel url
+      try {
+        const channelUrl = data.channelUrl || (data.handle ? `https://www.youtube.com/${data.handle.replace(/^@/, '')}` : null);
+        if (channelUrl) upsertContent({ platform: 'youtube', platformContentId: data.platformUserId, url: channelUrl, extra: { source: 'channel' } });
+      } catch (e) {
+        console.warn('[upsertContent] youtube batch insert failed', e && e.message ? e.message : e);
+      }
       results.push({
         ref,
         ok: true,
@@ -474,6 +501,14 @@ router.post('/kol/fetch/linkedin', async (req, res) => {
       subscribers: 0,
       extra: data.extra || null,
     });
+    // register linkedin org URL
+    try {
+      const orgId = data.platformUserId;
+      const idPart = String(orgId || '').split(':').pop();
+      if (idPart) upsertContent({ platform: 'linkedin', platformContentId: orgId, url: `https://www.linkedin.com/company/${idPart}`, extra: { source: 'organization' } });
+    } catch (e) {
+      console.warn('[upsertContent] linkedin insert failed', e && e.message ? e.message : e);
+    }
     res.json({ ...data, dbResult: result });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -502,6 +537,13 @@ router.post('/kol/fetch/meta', async (req, res) => {
       subscribers: 0,
       extra: data.extra || null,
     });
+    // register meta page URL
+    try {
+      const pageId = data.platformUserId;
+      if (pageId) upsertContent({ platform: 'meta', platformContentId: pageId, url: `https://www.facebook.com/${pageId}`, extra: { source: 'page' } });
+    } catch (e) {
+      console.warn('[upsertContent] meta insert failed', e && e.message ? e.message : e);
+    }
     res.json({ ...data, dbResult: result });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -530,6 +572,16 @@ router.post('/kol/fetch/tiktok', async (req, res) => {
       subscribers: 0,
       extra: data.extra || null,
     });
+    // register tiktok profile URL if available
+    try {
+      const handle = data.handle || null;
+      if (handle) {
+        const h = String(handle).replace(/^@/, '').trim();
+        if (h) upsertContent({ platform: 'tiktok', platformContentId: data.platformUserId, url: `https://www.tiktok.com/@${h}`, extra: { source: 'profile' } });
+      }
+    } catch (e) {
+      console.warn('[upsertContent] tiktok insert failed', e && e.message ? e.message : e);
+    }
     res.json({ ...data, dbResult: result });
   } catch (e) {
     res.status(500).json({ error: e.message });
