@@ -684,4 +684,16 @@ router.delete('/admin/contents/:id', (req, res) => {
   }
 });
 
+// Validate admin API key (used by frontend to confirm key before showing Admin link)
+router.get('/admin/validate', (req, res) => {
+  const provided = req.headers['x-admin-key'] || req.query?.adminKey || null;
+  if (!process.env.ADMIN_API_KEY) {
+    return res.json({ ok: false, note: 'ADMIN_API_KEY not configured' });
+  }
+  if (provided && provided === process.env.ADMIN_API_KEY) {
+    return res.json({ ok: true });
+  }
+  return res.json({ ok: false });
+});
+
 export { router as apiRouter };

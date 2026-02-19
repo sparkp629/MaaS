@@ -5,6 +5,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { Search, LogOut, Github, LayoutDashboard as DashIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
 
 const NAV_ITEMS = [
   { to: '/app', icon: DashIcon, label: 'Dashboard' },
@@ -13,6 +14,23 @@ const NAV_ITEMS = [
 
 export default function LayoutDashboard() {
   const { user, login, logout, isLoggedIn } = useAuth();
+
+  const [showAdminLink, setShowAdminLink] = useState(false);
+
+  useEffect(() => {
+    try {
+      const k = localStorage.getItem('admin_api_key');
+      if (!k) return;
+      fetch(`/api/admin/validate`, { headers: { 'x-admin-key': k } })
+        .then((r) => r.json())
+        .then((j) => {
+          if (j && j.ok) setShowAdminLink(true);
+        })
+        .catch(() => {});
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-slate-900/40">
@@ -41,8 +59,8 @@ export default function LayoutDashboard() {
               {item.label}
             </NavLink>
           ))}
-          {/* Admin link: visible only when an admin key is stored locally */}
-          {typeof window !== 'undefined' && localStorage.getItem('admin_api_key') ? (
+          {/* Admin link: visible only when admin key validated by server */}
+          {showAdminLink ? (
             <NavLink
               key="/app/admin"
               to="/app/admin"
