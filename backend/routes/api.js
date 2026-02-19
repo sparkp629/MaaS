@@ -9,6 +9,8 @@ import {
   getKolMetrics,
   trackClick,
   trackImpression,
+  listContents,
+  deleteContent,
 } from '../db/dal.js';
 import { rateLimitSuggestions } from '../middleware/rateLimit.js';
 import * as xClient from '../services/xClient.js';
@@ -646,6 +648,37 @@ router.post('/admin/run-availability-check', async (req, res) => {
   try {
     const result = await runAvailabilityCheck({ dbClient: null });
     return res.json({ ok: true, result });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// List tracked contents (admin)
+router.get('/admin/contents', (req, res) => {
+  const adminKey = req.headers['x-admin-key'] || req.query?.adminKey || null;
+  if (process.env.ADMIN_API_KEY && adminKey !== process.env.ADMIN_API_KEY) {
+    return res.status(401).json({ error: 'admin key manquante ou invalide' });
+  }
+  try {
+    const page = parseInt(req.query.page || '0', 10);
+    const limit = Math.min(1000, parseInt(req.query.limit || '200', 10));
+    const items = listContents(limit, page * limit);
+    return res.json({ ok: true, items });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Delete a tracked content
+router.delete('/admin/contents/:id', (req, res) => {
+  const adminKey = req.headers['x-admin-key'] || req.query?.adminKey || null;
+  if (process.env.ADMIN_API_KEY && adminKey !== process.env.ADMIN_API_KEY) {
+    return res.status(401).json({ error: 'admin key manquante ou invalide' });
+  }
+  try {
+    const id = parseInt(req.params.id, 10);
+    deleteContent(id);
+    return res.json({ ok: true });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

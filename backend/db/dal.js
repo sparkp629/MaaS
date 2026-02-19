@@ -164,6 +164,16 @@ export function markContentChecked(id, ok = true, info = null) {
   db.prepare('UPDATE contents SET status = ?, last_checked_at = datetime(\'now\'), extra_json = json(?) WHERE id = ?').run(status, info ? JSON.stringify(info) : null, id);
 }
 
+export function listContents(limit = 200, offset = 0) {
+  const db = getDb();
+  return db.prepare('SELECT * FROM contents ORDER BY last_checked_at IS NULL DESC, last_checked_at ASC LIMIT ? OFFSET ?').all(limit, offset);
+}
+
+export function deleteContent(id) {
+  const db = getDb();
+  return db.prepare('DELETE FROM contents WHERE id = ?').run(id);
+}
+
 // --- Tracking (clics/impressions réels) ---
 
 export function trackClick(campaignId, kolId, source) {
