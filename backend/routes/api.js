@@ -17,6 +17,7 @@ import * as metaClient from '../services/metaClient.js';
 import * as tiktokClient from '../services/tiktokClient.js';
 import { computeMultiChannelMI } from '../services/mindshareIndex.js';
 import { computeConversionScore } from '../services/kolScoring.js';
+import { checkOnce as runAvailabilityCheck } from '../services/availabilityChecker.js';
 
 const router = Router();
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -576,6 +577,25 @@ router.post('/track/impression', (req, res) => {
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// --- Admin: run availability checker on-demand ---
+router.post('/admin/run-availability-check', async (req, res) => {
+  const adminKey = req.headers['x-admin-key'] || req.body?.adminKey || req.query?.adminKey || null;
+  if (process.env.ADMIN_API_KEY) {
+    if (!adminKey || adminKey !== process.env.ADMIN_API_KEY) {
+      return res.status(401).json({ error: 'admin key manquante ou invalide' });
+    }
+  } else {
+    console.warn('[admin] ADMIN_API_KEY not set; endpoint open (dev only)');
+  }
+
+  try {
+    const result = await runAvailabilityCheck({ dbClient: null });
+    return res.json({ ok: true, result });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 });
 
