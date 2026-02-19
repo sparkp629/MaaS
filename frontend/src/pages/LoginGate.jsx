@@ -1,4 +1,4 @@
-import { Github } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -13,14 +13,14 @@ export default function LoginGate({ children }) {
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-6">
       <h1 className="text-2xl font-bold text-white mb-2">Connexion requise</h1>
       <p className="text-slate-400 text-center max-w-md mb-6">
-        Connectez-vous avec GitHub pour accéder au Dashboard et à toutes les métriques.
+        Connexion avec X requise, avec protection anti multi-comptes (empreinte navigateur) et blocage des adresses jetables.
       </p>
       <button
-        onClick={() => login('github')}
+        onClick={() => login('twitter')}
         className="flex items-center gap-3 px-8 py-4 bg-slate-700 hover:bg-slate-600 rounded-xl text-white font-medium"
       >
-        <Github className="w-6 h-6" />
-        Se connecter avec GitHub
+        <ShieldCheck className="w-6 h-6" />
+        Se connecter avec X
       </button>
     </div>
   );

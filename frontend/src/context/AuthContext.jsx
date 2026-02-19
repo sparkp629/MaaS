@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
     if (isSupabaseConfigured() && supabase) {
       try {
         const { error } = await supabase.auth.signInWithOAuth({
-          provider: provider === 'github' ? 'github' : 'google',
+          provider: provider === 'twitter' ? 'twitter' : provider === 'github' ? 'github' : 'google',
           options: { redirectTo: window.location.origin + window.location.pathname },
         });
         if (error) {

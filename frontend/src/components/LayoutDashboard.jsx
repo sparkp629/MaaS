@@ -15,9 +15,9 @@ export default function LayoutDashboard() {
   const { user, login, logout, isLoggedIn } = useAuth();
 
   return (
-    <div className="min-h-screen flex bg-slate-900/40">
+    <div className="min-h-screen flex bg-[#050816]">
       {/* Sidebar */}
-      <aside className="w-56 shrink-0 border-r border-slate-700/30 flex flex-col bg-slate-900/60">
+      <aside className="w-56 shrink-0 border-r border-indigo-900/40 flex flex-col bg-[#0a1028]">
         <div className="px-4 py-5 border-b border-slate-700/30">
           <span className="text-lg font-bold text-white">MaaS</span>
           <span className="text-xs text-indigo-400 ml-1">Pro</span>
@@ -32,8 +32,8 @@ export default function LayoutDashboard() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-indigo-500/20 text-indigo-300'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    ? 'bg-cyan-500/20 text-cyan-200'
+                    : 'text-slate-400 hover:text-white hover:bg-indigo-950/40'
                 }`
               }
             >
@@ -55,7 +55,7 @@ export default function LayoutDashboard() {
           </div>
           <button
             onClick={logout}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 text-sm w-full transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-indigo-950/40 text-sm w-full transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Déconnexion

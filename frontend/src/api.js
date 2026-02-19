@@ -20,6 +20,12 @@ export const api = {
   async getRoi() {
     return safeFetch(`${API_BASE}/roi`);
   },
+  async getApiStatus() {
+    return safeFetch(`${API_BASE}/status/apis`);
+  },
+  async getHygieneStatus() {
+    return safeFetch(`${API_BASE}/status/hygiene`);
+  },
   async generateContent(body) {
     return safeFetch(`${API_BASE}/content/generate`, {
       method: 'POST',
@@ -41,12 +47,8 @@ export const api = {
       body: JSON.stringify(options),
     });
   },
-
-  // --- KOL Metrics (données réelles) ---
   async getKolMetrics(platform = null) {
-    const url = platform
-      ? `${API_BASE}/kol/metrics/${platform}`
-      : `${API_BASE}/kol/metrics`;
+    const url = platform ? `${API_BASE}/kol/metrics/${platform}` : `${API_BASE}/kol/metrics`;
     return safeFetch(url);
   },
   async fetchXKol(username) {
@@ -63,13 +65,6 @@ export const api = {
       body: JSON.stringify({ channelId }),
     });
   },
-
-  // --- API Status ---
-  async getApiStatus() {
-    return safeFetch(`${API_BASE}/status/apis`);
-  },
-
-  // --- Tracking ---
   async trackImpression(campaignId, kolId, source, count = 1) {
     return safeFetch(`${API_BASE}/track/impression`, {
       method: 'POST',
