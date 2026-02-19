@@ -11,6 +11,8 @@ import cors from 'cors';
 import { apiRouter } from './routes/api.js';
 import { initAwsSecrets } from './services/awsSecrets.js';
 import { stripeWebhookRouter } from './routes/stripeWebhook.js';
+import { normalizeEnv } from './services/envNormalize.js';
+import { startScheduler } from './services/availabilityChecker.js';
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -26,7 +28,8 @@ app.use('/api', apiRouter);
 
 app.get('/health', (_, res) => res.json({ ok: true }));
 
-// Initialize secrets (AWS Secrets Manager) before starting the server
+// Normalize env aliases and then initialize secrets (AWS Secrets Manager)
+normalizeEnv();
 await initAwsSecrets();
 
 const server = app.listen(PORT, () => {
@@ -40,3 +43,9 @@ server.on('error', (err) => {
   }
   throw err;
 });
+
+// Optionally start the availability checker (disabled by default)
+if (process.env.ENABLE_AVAILABILITY_CHECKER === 'true') {
+  const minutes = parseInt(process.env.AVAILABILITY_CHECK_INTERVAL_MINUTES || '60', 10);
+  startScheduler({ minutes });
+}
