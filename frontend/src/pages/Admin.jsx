@@ -1,14 +1,39 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminPage() {
+  const navigate = useNavigate();
   const [adminKey, setAdminKey] = useState(() => localStorage.getItem('admin_api_key') || '');
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState(false);
+  const [validated, setValidated] = useState(false);
 
   function saveKey(k) {
     setAdminKey(k);
     try { localStorage.setItem('admin_api_key', k); } catch {}
+  }
+
+  async function validateKeyAndFetch() {
+    try {
+      const key = localStorage.getItem('admin_api_key');
+      if (!key) {
+        alert('Clé admin manquante.');
+        return navigate('/app');
+      }
+      const res = await fetch('/api/admin/validate', { headers: { 'x-admin-key': key } });
+      const j = await res.json();
+      if (!j || !j.ok) {
+        alert('Clé admin invalide.');
+        return navigate('/app');
+      }
+      setValidated(true);
+      fetchContents();
+    } catch (e) {
+      console.error(e);
+      alert('Erreur de validation.');
+      navigate('/app');
+    }
   }
 
   async function fetchContents() {
@@ -55,7 +80,7 @@ export default function AdminPage() {
     } catch (e) { alert('Erreur réseau'); }
   }
 
-  useEffect(() => { fetchContents(); }, []);
+  useEffect(() => { validateKeyAndFetch(); }, []);
 
   return (
     <div className="p-4">
@@ -65,8 +90,8 @@ export default function AdminPage() {
         <input value={adminKey} onChange={(e) => saveKey(e.target.value)} className="border p-2 w-full" />
       </div>
       <div className="flex gap-2 mb-4">
-        <button onClick={runCheck} disabled={running} className="px-3 py-2 bg-sky-600 text-white rounded">{running ? 'En cours...' : 'Lancer vérification'}</button>
-        <button onClick={fetchContents} disabled={loading} className="px-3 py-2 bg-gray-200 rounded">{loading ? 'Chargement...' : 'Rafraîchir la liste'}</button>
+        <button onClick={runCheck} disabled={running || !validated} className="px-3 py-2 bg-sky-600 text-white rounded">{running ? 'En cours...' : 'Lancer vérification'}</button>
+        <button onClick={fetchContents} disabled={loading || !validated} className="px-3 py-2 bg-gray-200 rounded">{loading ? 'Chargement...' : 'Rafraîchir la liste'}</button>
       </div>
 
       <table className="w-full text-sm border-collapse">
