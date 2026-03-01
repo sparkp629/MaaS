@@ -1,80 +1,84 @@
 const API_BASE = '/api';
 
-async function safeFetch(url, options = {}) {
-  const res = await fetch(url, options);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-  return data;
+async function request(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, options);
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload.error || `Request failed (${response.status})`);
+  }
+
+  return payload;
 }
 
 export const api = {
-  async getDashboard() {
-    return safeFetch(`${API_BASE}/dashboard`);
+  getNiches() {
+    return request('/niches');
   },
-  async getKOLs() {
-    return safeFetch(`${API_BASE}/kol`);
+
+  getDashboard(nicheKey) {
+    const search = nicheKey ? `?niche=${encodeURIComponent(nicheKey)}` : '';
+    return request(`/dashboard${search}`);
   },
-  async getIntelligence() {
-    return safeFetch(`${API_BASE}/intelligence`);
-  },
-  async getRoi() {
-    return safeFetch(`${API_BASE}/roi`);
-  },
-  async generateContent(body) {
-    return safeFetch(`${API_BASE}/content/generate`, {
+
+  saveOnboarding(payload) {
+    return request('/onboarding', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-  },
-  async submitSuggestion(text) {
-    return safeFetch(`${API_BASE}/suggestions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-  },
-  async createCheckoutSession(options = {}) {
-    return safeFetch(`${API_BASE}/checkout/create-session`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(options),
+      body: JSON.stringify(payload),
     });
   },
 
-  // --- KOL Metrics (données réelles) ---
-  async getKolMetrics(platform = null) {
-    const url = platform
-      ? `${API_BASE}/kol/metrics/${platform}`
-      : `${API_BASE}/kol/metrics`;
-    return safeFetch(url);
+  getOffer() {
+    return request('/offer');
   },
-  async fetchXKol(username) {
-    return safeFetch(`${API_BASE}/kol/fetch/x`, {
+
+  getObjective() {
+    return request('/objective');
+  },
+
+  getConnectorStatus() {
+    return request('/connectors/status');
+  },
+
+  getConnectorSeeds(nicheKey = null) {
+    const search = nicheKey ? `?niche=${encodeURIComponent(nicheKey)}` : '';
+    return request(`/connectors/seeds${search}`);
+  },
+
+  syncConnectors(payload) {
+    return request('/connectors/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
-    });
-  },
-  async fetchYouTubeKol(channelId) {
-    return safeFetch(`${API_BASE}/kol/fetch/youtube`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channelId }),
+      body: JSON.stringify(payload || {}),
     });
   },
 
-  // --- API Status ---
-  async getApiStatus() {
-    return safeFetch(`${API_BASE}/status/apis`);
+  getCopywritingConfig() {
+    return request('/copywriting/config');
   },
 
-  // --- Tracking ---
-  async trackImpression(campaignId, kolId, source, count = 1) {
-    return safeFetch(`${API_BASE}/track/impression`, {
+  generateCopywriting(payload) {
+    return request('/copywriting/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ campaignId, kolId, source, count }),
+      body: JSON.stringify(payload || {}),
+    });
+  },
+
+  generateCopywritingRag(payload) {
+    return request('/copywriting/generate-rag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+  },
+
+  getSubstackTopicsFromSurvey(payload) {
+    return request('/survey/substack-topics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
     });
   },
 };

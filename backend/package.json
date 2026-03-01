@@ -4,16 +4,22 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "ingest:knowledge": "node scripts/ingest_knowledge_sources.mjs",
+    "vectors:knowledge": "node scripts/build_knowledge_vectors.mjs",
+    "sync:knowledge:supabase": "node scripts/sync_knowledge_to_supabase.mjs",
+    "pipeline:knowledge": "npm run ingest:knowledge && npm run vectors:knowledge && npm run sync:knowledge:supabase"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.379.0",
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "ioredis": "^5.3.2",
+    "mammoth": "^1.11.0",
+    "pdf-parse": "^1.1.1",
     "stripe": "^20.3.1",
-    "uuid": "^11.0.0",
-    "@aws-sdk/client-secrets-manager": "^3.379.0"
+    "uuid": "^11.0.0"
   }
-
 }
