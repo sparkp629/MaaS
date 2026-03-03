@@ -81,4 +81,40 @@ export const api = {
       body: JSON.stringify(payload || {}),
     });
   },
+
+  getTelegramAlertConfig(userKey = 'workspace-default') {
+    return request(`/alerts/telegram/config?userKey=${encodeURIComponent(userKey)}`);
+  },
+
+  updateTelegramAlertConfig(payload) {
+    return request('/alerts/telegram/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+  },
+
+  linkTelegramAlert(payload) {
+    return request('/alerts/telegram/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+  },
+
+  sendTelegramAlertTest(payload) {
+    return request('/alerts/telegram/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+  },
+
+  runKolPromptTest(payload) {
+    return request('/kol/prompt-test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+  },
 };

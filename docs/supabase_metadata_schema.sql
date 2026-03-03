@@ -185,3 +185,36 @@ create policy if not exists "public_write_knowledge_vectors"
   for all
   using (true)
   with check (true);
+
+-- ---------------------------------------------------------------------------
+-- Telegram alert connectivity (per-user QR + chat binding)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.telegram_alert_connections (
+  id uuid primary key default gen_random_uuid(),
+  user_key text not null unique,
+  link_token text unique,
+  status text not null default 'pending',
+  telegram_chat_id text,
+  telegram_username text,
+  min_impact_score integer not null default 70,
+  networks_csv text not null default 'X,YouTube',
+  daily_digest boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_telegram_alert_user
+  on public.telegram_alert_connections(user_key);
+
+alter publication supabase_realtime add table public.telegram_alert_connections;
+alter table public.telegram_alert_connections enable row level security;
+
+create policy if not exists "public_read_telegram_connections"
+  on public.telegram_alert_connections for select using (true);
+
+create policy if not exists "public_write_telegram_connections"
+  on public.telegram_alert_connections
+  for all
+  using (true)
+  with check (true);
