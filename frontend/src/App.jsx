@@ -20,8 +20,8 @@ const NETWORKS = Object.freeze([
   ['X', '/social-icons/x.svg', '#1d9bf0'],
   ['YouTube', '/social-icons/youtube.svg', '#ff0033'],
   ['Instagram', '/social-icons/instagram.svg', '#e4405f'],
-  ['Twitch', 'https://cdn.simpleicons.org/twitch/9146ff', '#9146ff'],
-  ['Meta', 'https://cdn.simpleicons.org/meta/0866ff', '#0866ff'],
+  ['Twitch', '/social-icons/twitch.svg', '#9146ff'],
+  ['Meta', '/social-icons/meta.svg', '#0866ff'],
 ]);
 const SUBSTACK_ICON = '/social-icons/substack.svg';
 
