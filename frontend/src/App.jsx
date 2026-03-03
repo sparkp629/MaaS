@@ -16,13 +16,13 @@ import {
 import { api } from './api';
 
 const USER_KEY = 'workspace-default';
-const NETWORKS = [
+const NETWORKS = Object.freeze([
   ['X', '/social-icons/x.svg', '#1d9bf0'],
   ['YouTube', '/social-icons/youtube.svg', '#ff0033'],
   ['Instagram', '/social-icons/instagram.svg', '#e4405f'],
   ['Twitch', 'https://cdn.simpleicons.org/twitch/9146ff', '#9146ff'],
   ['Meta', 'https://cdn.simpleicons.org/meta/0866ff', '#0866ff'],
-];
+]);
 const SUBSTACK_ICON = '/social-icons/substack.svg';
 
 const SURVEY_DEFAULT = {
