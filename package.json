@@ -8,9 +8,12 @@
     "dev:app": "npm run dev --prefix frontend",
     "test:lifecycle": "node scripts/test-lifecycle.mjs",
     "test:prepush": "npm run test:lifecycle",
-    "sync-skills": "xcopy /E /I /Y \".cursor\\skills\" \"%USERPROFILE%\\.cursor\\skills\""
+    "sync-skills": "xcopy /E /I /Y \".cursor\\skills\" \"%USERPROFILE%\\.cursor\\skills\"",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "concurrently": "^9.0.0",
+    "wrangler": "^4.69.0"
   }
 }
