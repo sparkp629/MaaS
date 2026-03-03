@@ -1,17 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  ArrowRight,
   Bell,
   Bot,
+  Building2,
+  Check,
+  ChevronLeft,
+  CircleDollarSign,
+  CreditCard,
   ExternalLink,
   Feather,
   FlaskConical,
   Gift,
   House,
+  LineChart,
   Leaf,
   ListChecks,
   Loader2,
+  Mail,
+  PenSquare,
+  Search,
+  Shield,
   Sparkles,
   Trash2,
+  Users,
 } from 'lucide-react';
 import { api } from './api';
 
@@ -31,6 +43,7 @@ const SURVEY_DEFAULT = {
   channel: 'youtube',
   saasStage: 'acquisition',
   mainPain: 'manque-de-signaux-qualifies',
+  focusTasks: ['benchmark-concurrents'],
   email: '',
 };
 
@@ -206,166 +219,384 @@ function Preview({ row }) {
   return <div className="preview-empty">Apercu indisponible</div>;
 }
 
-function Landing({ onStartSurvey, onOpenPayment, onOpenDashboard }) {
+const SERVICE_PILLS = [
+  {
+    icon: Users,
+    title: 'Matching KOL pertinent',
+    description: 'Selection automatique des profils les plus utiles a votre acquisition SaaS.',
+  },
+  {
+    icon: LineChart,
+    title: 'Contenus qui performent',
+    description: 'Top contenus X, YouTube, Instagram, Twitch et Meta, avec preuves de performance.',
+  },
+  {
+    icon: PenSquare,
+    title: 'Angles copywriting',
+    description: 'Generation assistee par vos prompts et votre base de connaissances vectorielle.',
+  },
+  {
+    icon: Shield,
+    title: 'Alerte directe',
+    description: 'Connexion Telegram par QR pour ne rater aucun signal prioritaire.',
+  },
+];
+
+function Landing({ onStartSurvey, onOpenOffers, onOpenDashboard }) {
   return (
     <section className="funnel-screen">
-      <div className="funnel-hero">
-        <p className="funnel-kicker">Plateforme privee SaaS</p>
-        <h1>Trouvez les signaux KOL qui convertissent, sans bruit.</h1>
-        <p>
-          Un diagnostic court, puis un dashboard prive avec contenus performants, profils pertinents et sujets
-          newsletters relies a votre niche.
-        </p>
-        <div className="funnel-actions">
-          <button type="button" className="action-btn" onClick={onStartSurvey}>
-            Lancer le sondage
-          </button>
-          <button type="button" className="action-btn ghost" onClick={onOpenPayment}>
-            Voir l'offre privee
-          </button>
-          <button type="button" className="action-btn ghost" onClick={onOpenDashboard}>
-            Ouvrir le dashboard
-          </button>
+      <div className="landing-header">
+        <h1>Get best-in-class analytical reports for your niche SaaS</h1>
+        <div className="landing-search">
+          <Search size={20} />
+          <input type="text" placeholder="Entrez votre niche ou votre compte..." disabled />
+        </div>
+        <div className="landing-chips">
+          <span>KOL qualifies verifies</span>
+          <span>Mesures d'impact reelles</span>
+          <span>Alerte et pilotage personnalises</span>
         </div>
       </div>
 
-      <div className="mystery-list">
-        <h2>Ce que l'offre contient</h2>
-        <ul>
-          <li>Selection KOL alignee sur votre avatar client</li>
-          <li>Bibliotheque hebdomadaire de contenus qui performent</li>
-          <li>Angles newsletters exploitables en vente B2B</li>
-          <li>Matrice copywriting pour vos pages et messages</li>
-          <li>Accompagnement strategique personnalise</li>
-        </ul>
+      <div className="landing-services">
+        {SERVICE_PILLS.map((service) => {
+          const Icon = service.icon;
+          return (
+            <article key={service.title} className="service-card">
+              <div className="service-icon"><Icon size={22} /></div>
+              <div>
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="funnel-actions">
+        <button type="button" className="action-btn" onClick={onStartSurvey}>
+          Lancer le sondage
+        </button>
+        <button type="button" className="action-btn ghost" onClick={onOpenOffers}>
+          Voir les offres
+        </button>
+        <button type="button" className="action-btn ghost" onClick={onOpenDashboard}>
+          Ouvrir le dashboard
+        </button>
       </div>
     </section>
   );
 }
 
+const SURVEY_TASK_OPTIONS = [
+  { value: 'benchmark-concurrents', label: 'Benchmark industry players' },
+  { value: 'market-shifts', label: 'Track market share shifts and new players' },
+  { value: 'audience-expansion', label: 'Understand and expand my audience' },
+  { value: 'consumer-trends', label: 'Spot consumer and market trends' },
+  { value: 'traffic-analysis', label: 'Analyser les sources de trafic concurrents' },
+  { value: 'ai-signals', label: "Explorer les signaux concurrentiels de l'IA generative" },
+];
+
+const SURVEY_OBJECTIVE_OPTIONS = [
+  { value: 'generation-de-leads', label: 'Analyser les concurrents et tendances du marche' },
+  { value: 'autorite-marche', label: 'Optimiser autorite et strategie de croissance' },
+  { value: 'acquisition-client', label: 'Accroitre acquisition et conversion client' },
+];
+
 function Survey({ value, onChange, onBack, onSubmit, loading }) {
+  const totalSteps = 5;
+  const [step, setStep] = useState(1);
+
+  const completion = Math.round((step / totalSteps) * 100);
+
+  function toggleTask(taskValue) {
+    const current = Array.isArray(value.focusTasks) ? value.focusTasks : [];
+    if (current.includes(taskValue)) {
+      onChange({ ...value, focusTasks: current.filter((item) => item !== taskValue) });
+      return;
+    }
+    onChange({ ...value, focusTasks: [...current, taskValue] });
+  }
+
+  function canContinue() {
+    if (step === 1) return Boolean(value.objective);
+    if (step === 2) return Array.isArray(value.focusTasks) && value.focusTasks.length > 0;
+    if (step === 3) return Boolean(value.channel);
+    if (step === 4) return Boolean(value.niche) && Boolean(value.saasStage);
+    return true;
+  }
+
+  function handleBack() {
+    if (step === 1) {
+      onBack();
+      return;
+    }
+    setStep((s) => Math.max(1, s - 1));
+  }
+
+  function handleNext() {
+    if (step < totalSteps) {
+      setStep((s) => Math.min(totalSteps, s + 1));
+      return;
+    }
+    onSubmit();
+  }
+
   return (
-    <section className="funnel-screen">
-      <div className="survey-card">
-        <h2>Sondage de qualification</h2>
-        <p>Repondez en 60 secondes pour personnaliser votre espace prive.</p>
-
-        <div className="survey-grid">
-          <label>
-            Niche
-            <select value={value.niche} onChange={(e) => onChange({ ...value, niche: e.target.value })}>
-              <option value="intelligence-artificielle-fr">Intelligence artificielle (FR)</option>
-              <option value="saas">SaaS</option>
-              <option value="startup">Startup</option>
-              <option value="automation">Automation</option>
-              <option value="tech">Tech</option>
-            </select>
-          </label>
-
-          <label>
-            Objectif prioritaire
-            <select value={value.objective} onChange={(e) => onChange({ ...value, objective: e.target.value })}>
-              <option value="generation-de-leads">Generer des leads qualifies</option>
-              <option value="autorite-marche">Gagner en autorite de marche</option>
-              <option value="acquisition-client">Accelerer l'acquisition client</option>
-            </select>
-          </label>
-
-          <label>
-            Canal prioritaire
-            <select value={value.channel} onChange={(e) => onChange({ ...value, channel: e.target.value })}>
-              <option value="youtube">YouTube</option>
-              <option value="x">X</option>
-              <option value="instagram">Instagram</option>
-              <option value="twitch">Twitch</option>
-            </select>
-          </label>
-
-          <label>
-            Etape SaaS
-            <select value={value.saasStage} onChange={(e) => onChange({ ...value, saasStage: e.target.value })}>
-              <option value="acquisition">Acquisition</option>
-              <option value="activation">Activation</option>
-              <option value="retention">Retention</option>
-              <option value="upsell">Expansion / Upsell</option>
-            </select>
-          </label>
-
-          <label className="span-2">
-            Blocage principal
-            <select value={value.mainPain} onChange={(e) => onChange({ ...value, mainPain: e.target.value })}>
-              <option value="manque-de-signaux-qualifies">Manque de signaux qualifies</option>
-              <option value="angles-contenus-faibles">Angles contenus faibles</option>
-              <option value="mauvais-fit-kol">Mauvais fit KOL</option>
-            </select>
-          </label>
+    <section className="funnel-screen survey-screen">
+      <div className="survey-wizard">
+        <div className="survey-progress-track">
+          <div className="survey-progress-value" style={{ width: `${completion}%` }} />
+        </div>
+        <div className="survey-topline">
+          <button type="button" className="survey-back" onClick={handleBack}>
+            <ChevronLeft size={18} /> Retour
+          </button>
+          <span>{step}/{totalSteps}</span>
         </div>
 
-        <div className="mail-capture">
-          <label>
-            Email (capture non active pour le moment)
-            <input
-              type="email"
-              placeholder="name@company.com"
-              value={value.email}
-              onChange={(e) => onChange({ ...value, email: e.target.value })}
-            />
-          </label>
-        </div>
+        {step === 1 ? (
+          <div className="survey-step">
+            <h2>Sur quoi souhaitez-vous vous concentrer en priorite ?</h2>
+            <p>Nous personaliserons votre parcours en fonction de votre selection.</p>
+            <div className="survey-options">
+              {SURVEY_OBJECTIVE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`survey-option ${value.objective === option.value ? 'active' : ''}`}
+                  onClick={() => onChange({ ...value, objective: option.value })}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
-        <div className="funnel-actions">
-          <button type="button" className="action-btn ghost" onClick={onBack}>Retour</button>
-          <button type="button" className="action-btn" onClick={onSubmit} disabled={loading}>
-            {loading ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
-            Creer mon espace
+        {step === 2 ? (
+          <div className="survey-step">
+            <h2>What’s your focus within this area?</h2>
+            <p>Choose the tasks that are most relevant to you.</p>
+            <div className="survey-options">
+              {SURVEY_TASK_OPTIONS.map((option) => {
+                const active = (value.focusTasks || []).includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`survey-option checkbox ${active ? 'active' : ''}`}
+                    onClick={() => toggleTask(option.value)}
+                  >
+                    <span className={`check-box ${active ? 'checked' : ''}`}>{active ? <Check size={14} /> : null}</span>
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 3 ? (
+          <div className="survey-step">
+            <h2>Quel canal doit etre prioritaire dans votre dashboard ?</h2>
+            <p>Ce choix pilotera le premier reseau affiche apres le sondage.</p>
+            <div className="survey-options compact">
+              {[
+                ['youtube', 'YouTube'],
+                ['x', 'X (Twitter)'],
+                ['instagram', 'Instagram'],
+                ['twitch', 'Twitch'],
+              ].map(([valueKey, label]) => (
+                <button
+                  key={valueKey}
+                  type="button"
+                  className={`survey-option ${value.channel === valueKey ? 'active' : ''}`}
+                  onClick={() => onChange({ ...value, channel: valueKey })}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 4 ? (
+          <div className="survey-step">
+            <h2>Cadrez votre contexte SaaS</h2>
+            <p>Nous utiliserons ces informations pour affiner la selection KOL.</p>
+            <div className="survey-inline-grid">
+              <label>
+                Niche
+                <select value={value.niche} onChange={(e) => onChange({ ...value, niche: e.target.value })}>
+                  <option value="intelligence-artificielle-fr">Intelligence artificielle (FR)</option>
+                  <option value="saas">SaaS</option>
+                  <option value="startup">Startup</option>
+                  <option value="automation">Automation</option>
+                  <option value="tech">Tech</option>
+                </select>
+              </label>
+              <label>
+                Etape SaaS
+                <select value={value.saasStage} onChange={(e) => onChange({ ...value, saasStage: e.target.value })}>
+                  <option value="acquisition">Acquisition</option>
+                  <option value="activation">Activation</option>
+                  <option value="retention">Retention</option>
+                  <option value="upsell">Expansion / Upsell</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        ) : null}
+
+        {step === 5 ? (
+          <div className="survey-step">
+            <h2>Quelle est votre adresse de messagerie professionnelle ?</h2>
+            <p>Vous pourrez la modifier plus tard.</p>
+            <div className="survey-email-wrap">
+              <Mail size={16} />
+              <input
+                type="email"
+                placeholder="name@company.com"
+                value={value.email}
+                onChange={(e) => onChange({ ...value, email: e.target.value })}
+              />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="survey-actions">
+          {step === 5 ? (
+            <button type="button" className="action-btn ghost" onClick={onSubmit} disabled={loading}>
+              Ignorer
+            </button>
+          ) : null}
+          <button type="button" className="action-btn" onClick={handleNext} disabled={!canContinue() || loading}>
+            {loading ? <Loader2 size={16} className="spin" /> : null}
+            {step < totalSteps ? 'Suivant' : 'Creer mon espace'}
+            <ArrowRight size={16} />
           </button>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function OffersPage({ onBack, onOpenPayment }) {
+  return (
+    <section className="funnel-screen">
+      <div className="offers-layout">
+        <section className="offers-left">
+          <p className="offers-brand">MaaS</p>
+          <h2>MANAGE & GROW YOUR INFLUENCER PROGRAM</h2>
+          <p>
+            Positionnement high-ticket: accompagnement strategique + execution guidee.
+            L'outil seul ne suffit pas, on pilote le plan avec vous.
+          </p>
+          <ul>
+            <li><Check size={16} /> Find perfect-fit creators at scale</li>
+            <li><Check size={16} /> Streamline influencer outreach</li>
+            <li><Check size={16} /> Track campaign performance automatically</li>
+            <li><Check size={16} /> Pay creators worldwide instantly</li>
+          </ul>
+          <div className="offer-tiers">
+            <article>
+              <h3>Diagnostic intensif</h3>
+              <p>A partir de 2 500 EUR</p>
+            </article>
+            <article className="highlighted">
+              <h3>Sprint high-ticket</h3>
+              <p>A partir de 5 000 EUR</p>
+            </article>
+            <article>
+              <h3>Pilotage mensuel</h3>
+              <p>A partir de 9 000 EUR</p>
+            </article>
+          </div>
+        </section>
+
+        <section className="offers-right">
+          <div className="request-card">
+            <h3>Request a Demo</h3>
+            <p>Enter your details and we'll find the best way to help you.</p>
+            <label>Name *<input type="text" placeholder="Your name" /></label>
+            <label>Business email *<input type="email" placeholder="you@company.com" /></label>
+            <label>Company *<input type="text" placeholder="Company name" /></label>
+            <button type="button" className="action-btn" onClick={onOpenPayment}>
+              Continuer vers paiement <ArrowRight size={16} />
+            </button>
+            <button type="button" className="action-btn ghost" onClick={onBack}>Retour</button>
+          </div>
+        </section>
       </div>
     </section>
   );
 }
 
 function PaymentPage({ onBack, onOpenDashboard }) {
+  const [cycle, setCycle] = useState('mensuel');
   return (
     <section className="funnel-screen">
-      <div className="payment-card">
-        <h2>Offre privee High Ticket</h2>
-        <p>Positionnement premium: acces reserve, sans prix public affiche.</p>
+      <div className="payment-split">
+        <section className="payment-left">
+          <h2>Try MaaS for free</h2>
+          <p>Essai gratuit 7 jours - annulation a tout moment</p>
+          <ol>
+            <li>
+              <CircleDollarSign size={18} />
+              <div>
+                <strong>Aujourd'hui: configurez votre essai gratuit</strong>
+                <p>Ajoutez vos informations de paiement. 0 EUR aujourd'hui.</p>
+              </div>
+            </li>
+            <li>
+              <CreditCard size={18} />
+              <div>
+                <strong>Saisissez vos informations de paiement</strong>
+                <p>Vous ne serez pas facture avant la fin de l'essai.</p>
+              </div>
+            </li>
+            <li>
+              <Building2 size={18} />
+              <div>
+                <strong>Activation de votre abonnement</strong>
+                <p>Votre espace est active, vous pouvez entrer dans le dashboard prive.</p>
+              </div>
+            </li>
+          </ol>
+        </section>
 
-        <div className="offer-columns">
-          <article>
-            <h3>Ce qui est inclus</h3>
-            <ul>
-              <li>Dashboard prive avec signaux KOL verifies</li>
-              <li>Selection de contenus performants par priorite business</li>
-              <li>Sujets newsletters utiles pour closing et autorite</li>
-              <li>Systeme copywriting alimente par votre base vectorielle</li>
-              <li>Support strategique pour votre plan d'execution</li>
-            </ul>
-          </article>
-          <article>
-            <h3>Arbitrage commercial</h3>
-            <ul>
-              <li>Prix cache: filtre fort, mais baisse le taux de prise de rendez-vous</li>
-              <li>Alternative recommandee: \"a partir de\" + call de qualification</li>
-              <li>Concurrents: majorite d'offres self-serve low ticket</li>
-              <li>Positionnement conseille: audit + plan + execution guidee, pas simple outil</li>
-            </ul>
-          </article>
-          <article>
-            <h3>Formats d'engagement possibles</h3>
-            <ul>
-              <li>Diagnostic intensif (court, decisif)</li>
-              <li>Implementation assistee (90 jours)</li>
-              <li>Partenariat continu (pilotage mensuel)</li>
-            </ul>
-          </article>
-        </div>
-
-        <div className="funnel-actions">
-          <button type="button" className="action-btn ghost" onClick={onBack}>Retour</button>
-          <button type="button" className="action-btn" onClick={onOpenDashboard}>Acceder au dashboard</button>
-        </div>
+        <section className="payment-right">
+          <h3>Veille concurrentielle et SEO</h3>
+          <ul>
+            <li><Check size={16} /> 3 mois de donnees historiques</li>
+            <li><Check size={16} /> Website analysis</li>
+            <li><Check size={16} /> Backlink Analytics</li>
+            <li><Check size={16} /> Rank Tracker</li>
+            <li><Check size={16} /> Site Audit</li>
+          </ul>
+          <div className="billing-cycle">
+            <p>Cycle de facturation</p>
+            <label>
+              <input type="radio" checked={cycle === 'annuel'} onChange={() => setCycle('annuel')} />
+              <span>Annuel - meilleur ratio qualite/prix</span>
+            </label>
+            <label>
+              <input type="radio" checked={cycle === 'mensuel'} onChange={() => setCycle('mensuel')} />
+              <span>Mensuel</span>
+            </label>
+            <div className="billing-total">
+              <span>Du aujourd'hui</span>
+              <strong>0 EUR</strong>
+            </div>
+          </div>
+          <div className="funnel-actions">
+            <button type="button" className="action-btn ghost" onClick={onBack}>Retour</button>
+            <button type="button" className="action-btn" onClick={onOpenDashboard}>
+              Suivant <ArrowRight size={16} />
+            </button>
+          </div>
+        </section>
       </div>
     </section>
   );
@@ -787,8 +1018,17 @@ export default function App() {
         <main className="dashboard-shell">
           <Landing
             onStartSurvey={() => setView('survey')}
-            onOpenPayment={() => setView('payment')}
+            onOpenOffers={() => setView('offers')}
             onOpenDashboard={() => setView('dashboard')}
+          />
+        </main>
+      ) : null}
+
+      {view === 'offers' ? (
+        <main className="dashboard-shell">
+          <OffersPage
+            onBack={() => setView('landing')}
+            onOpenPayment={() => setView('payment')}
           />
         </main>
       ) : null}
@@ -808,7 +1048,7 @@ export default function App() {
       {view === 'payment' ? (
         <main className="dashboard-shell">
           <PaymentPage
-            onBack={() => setView('landing')}
+            onBack={() => setView('offers')}
             onOpenDashboard={() => setView('dashboard')}
           />
         </main>
