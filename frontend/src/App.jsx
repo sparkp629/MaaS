@@ -8,9 +8,9 @@ import {
   ChevronLeft,
   CircleDollarSign,
   CreditCard,
+  Eye,
   ExternalLink,
   Feather,
-  FlaskConical,
   Gift,
   House,
   LineChart,
@@ -18,12 +18,10 @@ import {
   ListChecks,
   Loader2,
   Mail,
-  PenSquare,
-  Search,
-  Shield,
+  MailCheck,
+  PhoneCall,
   Sparkles,
   Trash2,
-  Users,
 } from 'lucide-react';
 import { api } from './api';
 
@@ -36,6 +34,15 @@ const NETWORKS = Object.freeze([
   ['Meta', '/social-icons/meta.svg', '#0866ff'],
 ]);
 const SUBSTACK_ICON = '/social-icons/substack.svg';
+const SAAS_NAME = 'NOCTIS SIGNAL';
+
+const VIEW_PATHS = Object.freeze({
+  landing: '/landing',
+  survey: '/survey',
+  offers: '/offers',
+  payment: '/payment',
+  dashboard: '/dashboard',
+});
 
 const SURVEY_DEFAULT = {
   niche: 'intelligence-artificielle-fr',
@@ -95,11 +102,6 @@ function rel(dateInput) {
   if (abs < 3600) return rtf.format(Math.round(sec / 60), 'minute');
   if (abs < 86400) return rtf.format(Math.round(sec / 3600), 'hour');
   return rtf.format(Math.round(sec / 86400), 'day');
-}
-function weekly(dateInput, days = 7) {
-  if (!dateInput) return false;
-  const d = new Date(dateInput);
-  return !Number.isNaN(d.getTime()) && d.getTime() >= Date.now() - days * 86400000;
 }
 function trend(row) {
   const m = row.metrics || {};
@@ -220,55 +222,30 @@ function Preview({ row }) {
 }
 
 const SERVICE_PILLS = [
-  {
-    icon: Users,
-    title: 'Matching KOL pertinent',
-    description: 'Selection automatique des profils les plus utiles a votre acquisition SaaS.',
-  },
-  {
-    icon: LineChart,
-    title: 'Contenus qui performent',
-    description: 'Top contenus X, YouTube, Instagram, Twitch et Meta, avec preuves de performance.',
-  },
-  {
-    icon: PenSquare,
-    title: 'Angles copywriting',
-    description: 'Generation assistee par vos prompts et votre base de connaissances vectorielle.',
-  },
-  {
-    icon: Shield,
-    title: 'Alerte directe',
-    description: 'Connexion Telegram par QR pour ne rater aucun signal prioritaire.',
-  },
+  { icon: ListChecks, title: 'Sondage onboarding' },
+  { icon: LineChart, title: 'Etude SaaS client' },
+  { icon: PhoneCall, title: 'Call qualification' },
+  { icon: MailCheck, title: 'Reception mail' },
+  { icon: Eye, title: 'Dashboard presence mediatique' },
 ];
 
-function Landing({ onStartSurvey, onOpenOffers, onOpenDashboard }) {
+function Landing({ onStartSurvey }) {
   return (
     <section className="funnel-screen">
-      <div className="landing-header">
-        <h1>Get best-in-class analytical reports for your niche SaaS</h1>
-        <div className="landing-search">
-          <Search size={20} />
-          <input type="text" placeholder="Entrez votre niche ou votre compte..." disabled />
-        </div>
-        <div className="landing-chips">
-          <span>KOL qualifies verifies</span>
-          <span>Mesures d'impact reelles</span>
-          <span>Alerte et pilotage personnalises</span>
-        </div>
+      <div className="landing-brand">
+        <h1>{SAAS_NAME}</h1>
       </div>
 
-      <div className="landing-services">
-        {SERVICE_PILLS.map((service) => {
+      <div className="journey-track" aria-label="Parcours utilisateur">
+        {SERVICE_PILLS.map((service, idx) => {
           const Icon = service.icon;
           return (
-            <article key={service.title} className="service-card">
-              <div className="service-icon"><Icon size={22} /></div>
-              <div>
-                <h3>{service.title}</h3>
-                <p>{service.description}</p>
+            <div key={service.title} className="journey-step">
+              <div className="journey-node" title={service.title} aria-label={service.title}>
+                <Icon size={24} />
               </div>
-            </article>
+              {idx < SERVICE_PILLS.length - 1 ? <span className="journey-arrow">-&gt;</span> : null}
+            </div>
           );
         })}
       </div>
@@ -276,12 +253,6 @@ function Landing({ onStartSurvey, onOpenOffers, onOpenDashboard }) {
       <div className="funnel-actions">
         <button type="button" className="action-btn" onClick={onStartSurvey}>
           Lancer le sondage
-        </button>
-        <button type="button" className="action-btn ghost" onClick={onOpenOffers}>
-          Voir les offres
-        </button>
-        <button type="button" className="action-btn ghost" onClick={onOpenDashboard}>
-          Ouvrir le dashboard
         </button>
       </div>
     </section>
@@ -376,7 +347,7 @@ function Survey({ value, onChange, onBack, onSubmit, loading }) {
 
         {step === 2 ? (
           <div className="survey-step">
-            <h2>What’s your focus within this area?</h2>
+            <h2>What's your focus within this area?</h2>
             <p>Choose the tasks that are most relevant to you.</p>
             <div className="survey-options">
               {SURVEY_TASK_OPTIONS.map((option) => {
@@ -610,7 +581,6 @@ function SideNav({ active, setActive }) {
     ['alerts', 'Alertes', Bell],
     ['tasks', 'Task', ListChecks],
     ['automation', 'Automation', Bot],
-    ['tests', 'Tests', FlaskConical],
   ];
   return (
     <aside className="side-nav">
@@ -843,68 +813,19 @@ function Automation() {
   );
 }
 
-function TestLab({ selectedNiche, survey }) {
-  const [results, setResults] = useState([]);
-  const [running, setRunning] = useState(false);
-
-  async function runTest(label, fn) {
-    const startedAt = new Date().toISOString();
-    try {
-      const output = await fn();
-      setResults((prev) => [{ label, ok: true, startedAt, output: JSON.stringify(output).slice(0, 220) }, ...prev]);
-    } catch (error) {
-      setResults((prev) => [{ label, ok: false, startedAt, output: String(error.message || error).slice(0, 220) }, ...prev]);
-    }
-  }
-
-  async function runAll() {
-    setRunning(true);
-    try {
-      await runTest('Survey -> DB', () => api.saveOnboarding({
-        nicheKey: selectedNiche,
-        objective: survey.objective || 'generation-de-leads',
-        budgetRange: 'high-ticket',
-      }));
-      await runTest('KOL prompt -> DB', () => api.runKolPromptSync({
-        nicheKey: selectedNiche,
-        surveyAnswers: survey,
-        countryCode: 'FR',
-        language: 'fr',
-        limit: 10,
-      }));
-      await runTest('QR Telegram', () => api.getTelegramAlertConfig(USER_KEY));
-      await runTest('Copywriting RAG', () => api.generateCopywritingRag({
-        productName: 'Offre high ticket',
-        productDescription: 'Test client',
-        niche: selectedNiche,
-        tone: 'informatif',
-      }));
-    } finally {
-      setRunning(false);
-    }
-  }
-
-  return (
-    <section className="utility-panel">
-      <h2>Tests parcours client</h2>
-      <p>Validation du maillage interne et des fonctions critiques avant mise en production.</p>
-      <button type="button" className="action-btn" onClick={runAll} disabled={running}>
-        {running ? <Loader2 size={16} className="spin" /> : <FlaskConical size={16} />} Lancer les tests
-      </button>
-      <div className="test-list">
-        {results.length ? results.map((row) => (
-          <article key={`${row.label}-${row.startedAt}`} className={`test-item ${row.ok ? 'ok' : 'ko'}`}>
-            <strong>{row.ok ? 'OK' : 'KO'} - {row.label}</strong>
-            <p>{row.output}</p>
-          </article>
-        )) : <div className="empty">Aucun test lance.</div>}
-      </div>
-    </section>
-  );
+function normalizeViewFromPath(pathname) {
+  const raw = String(pathname || '/').trim().toLowerCase();
+  if (raw === '/survey') return 'survey';
+  if (raw === '/offers') return 'offers';
+  if (raw === '/payment') return 'payment';
+  if (raw === '/dashboard') return 'dashboard';
+  return 'landing';
 }
 
 export default function App() {
-  const [view, setView] = useState('landing');
+  const [view, setView] = useState(() =>
+    typeof window === 'undefined' ? 'landing' : normalizeViewFromPath(window.location.pathname)
+  );
   const [survey, setSurvey] = useState(SURVEY_DEFAULT);
   const [submittingSurvey, setSubmittingSurvey] = useState(false);
   const [active, setActive] = useState('home');
@@ -949,6 +870,23 @@ export default function App() {
       } catch (e) { setError(e.message || 'Chargement impossible.'); } finally { setLoading(false); }
     }
     boot();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const targetPath = VIEW_PATHS[view] || VIEW_PATHS.landing;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
+    }
+  }, [view]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handler = () => {
+      setView(normalizeViewFromPath(window.location.pathname));
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
   }, []);
 
   const currentDashboard = useMemo(
@@ -998,6 +936,13 @@ export default function App() {
         language: 'fr',
         limit: 10,
       }).catch(() => null);
+      const refreshed = await api.getDashboard(survey.niche).catch(() => null);
+      if (refreshed?.niche?.key) {
+        setDashboards((prev) => {
+          const rest = prev.filter((item) => item?.niche?.key !== refreshed.niche.key);
+          return [refreshed, ...rest];
+        });
+      }
       localStorage.setItem('maas_survey_capture', JSON.stringify({
         ...survey,
         capturedAt: new Date().toISOString(),
@@ -1018,8 +963,6 @@ export default function App() {
         <main className="dashboard-shell">
           <Landing
             onStartSurvey={() => setView('survey')}
-            onOpenOffers={() => setView('offers')}
-            onOpenDashboard={() => setView('dashboard')}
           />
         </main>
       ) : null}
@@ -1064,7 +1007,6 @@ export default function App() {
             {active === 'alerts' ? <Alerts /> : null}
             {active === 'tasks' ? <Tasks /> : null}
             {active === 'automation' ? <Automation /> : null}
-            {active === 'tests' ? <TestLab selectedNiche={selectedNiche} survey={survey} /> : null}
           </section>
         </main>
       ) : null}

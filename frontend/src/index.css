@@ -537,108 +537,57 @@ body {
   height: 18px;
 }
 
-.test-list {
-  display: grid;
-  gap: 8px;
-}
-
-.test-item {
-  border: 1px solid rgba(8, 48, 61, 0.2);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.28);
-  padding: 8px;
-}
-.test-item.ok { border-color: rgba(34, 197, 94, 0.45); }
-.test-item.ko { border-color: rgba(239, 68, 68, 0.45); }
-.test-item strong { font-size: 0.82rem; display: block; margin-bottom: 4px; }
-.test-item p { margin: 0; font-size: 0.75rem; color: var(--muted); }
-
 .funnel-screen {
   height: 100%;
   overflow: auto;
   padding: 20px;
   display: grid;
   gap: 14px;
-}
-
-.landing-header {
-  display: grid;
-  gap: 14px;
-  text-align: center;
+  align-content: center;
   justify-items: center;
 }
-.landing-header h1 {
+
+.landing-brand h1 {
   margin: 0;
-  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  font-size: clamp(2.3rem, 5vw, 4rem);
   line-height: 1.1;
-  max-width: 920px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
 }
-.landing-search {
-  width: min(100%, 1120px);
-  min-height: 66px;
-  border-radius: 12px;
-  border: 2px solid #ee5c3f;
+
+.journey-track {
+  width: min(100%, 1080px);
   display: grid;
-  grid-template-columns: 28px 1fr;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
   align-items: center;
-  gap: 8px;
-  padding: 0 14px;
-  background: rgba(255, 255, 255, 0.75);
-  color: #6e8493;
 }
-.landing-search input {
-  border: 0;
-  outline: none;
-  background: transparent;
-  font-size: 1.02rem;
-  color: #6e8493;
-}
-.landing-chips {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+
+.journey-step {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-}
-.landing-chips span {
-  border-radius: 999px;
-  border: 1px solid rgba(8, 48, 61, 0.16);
-  background: rgba(242, 247, 250, 0.95);
-  padding: 6px 12px;
-  font-size: 0.9rem;
-}
-.landing-services {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.service-card {
-  border: 1px solid rgba(8, 48, 61, 0.16);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
-  padding: 12px;
-  display: grid;
-  grid-template-columns: 42px 1fr;
   gap: 10px;
 }
-.service-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  border: 1px solid rgba(8, 48, 61, 0.16);
-  background: rgba(229, 240, 248, 0.9);
+
+.journey-node {
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
+  border: 1px solid rgba(8, 48, 61, 0.22);
+  background: rgba(255, 255, 255, 0.55);
+  color: #0a3a49;
   display: grid;
   place-items: center;
 }
-.service-card h3 {
-  margin: 0 0 4px;
-  font-size: 0.96rem;
+
+.journey-arrow {
+  font-size: 1.2rem;
+  color: #2d5561;
+  font-weight: 700;
 }
-.service-card p {
-  margin: 0;
-  font-size: 0.86rem;
-  color: #2e5661;
-  line-height: 1.35;
-}
+
 .funnel-actions {
   display: flex;
   gap: 8px;
@@ -1013,13 +962,17 @@ body {
   .feed-row { grid-template-columns: 1fr; }
   .row-right { justify-items: start; }
   .automation-scene { grid-template-columns: 1fr; }
-  .landing-services,
+  .journey-track,
   .survey-options.compact,
   .survey-inline-grid,
   .offers-layout,
   .offer-tiers,
   .payment-split {
     grid-template-columns: 1fr;
+  }
+  .journey-node {
+    width: 72px;
+    height: 72px;
   }
   .survey-wizard {
     min-height: auto;
