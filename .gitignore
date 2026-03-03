@@ -11,3 +11,9 @@ logs/
 
 # Règles Cursor : garder en local uniquement, ne pas pousser sur GitHub
 .cursor/rules/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
