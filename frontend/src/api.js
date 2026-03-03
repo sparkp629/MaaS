@@ -117,4 +117,12 @@ export const api = {
       body: JSON.stringify(payload || {}),
     });
   },
+
+  runKolPromptSync(payload) {
+    return request('/kol/prompt-sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+  },
 };

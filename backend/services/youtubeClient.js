@@ -6,6 +6,18 @@
 const BASE_URL = 'https://www.googleapis.com/youtube/v3';
 let keyCursor = 0;
 
+function pickBestThumbnail(thumbnails) {
+  if (!thumbnails || typeof thumbnails !== 'object') return null;
+  return (
+    thumbnails.maxres?.url ||
+    thumbnails.standard?.url ||
+    thumbnails.high?.url ||
+    thumbnails.medium?.url ||
+    thumbnails.default?.url ||
+    null
+  );
+}
+
 function parseCsvKeys(value) {
   return String(value || '')
     .split(',')
@@ -93,7 +105,7 @@ export async function getChannelStats(channelId) {
     channelId: ch.id,
     title: ch.snippet?.title,
     description: ch.snippet?.description?.slice(0, 2000) || '',
-    thumbnailUrl: ch.snippet?.thumbnails?.medium?.url,
+    thumbnailUrl: pickBestThumbnail(ch.snippet?.thumbnails),
     subscribers: parseInt(ch.statistics?.subscriberCount, 10) || 0,
     totalViews: parseInt(ch.statistics?.viewCount, 10) || 0,
     videoCount: parseInt(ch.statistics?.videoCount, 10) || 0,
@@ -118,7 +130,7 @@ export async function searchChannel(query) {
   return {
     channelId: item.snippet?.channelId || item.id?.channelId,
     title: item.snippet?.title,
-    thumbnailUrl: item.snippet?.thumbnails?.medium?.url,
+    thumbnailUrl: pickBestThumbnail(item.snippet?.thumbnails),
   };
 }
 
@@ -181,7 +193,7 @@ async function getChannelByHandle(handle) {
     channelId: ch.id,
     title: ch.snippet?.title,
     description: ch.snippet?.description?.slice(0, 2000) || '',
-    thumbnailUrl: ch.snippet?.thumbnails?.medium?.url,
+    thumbnailUrl: pickBestThumbnail(ch.snippet?.thumbnails),
     subscribers: parseInt(ch.statistics?.subscriberCount, 10) || 0,
     totalViews: parseInt(ch.statistics?.viewCount, 10) || 0,
     videoCount: parseInt(ch.statistics?.videoCount, 10) || 0,
@@ -215,7 +227,7 @@ export async function getRecentVideos(channelId, maxResults = 5) {
     videoId: v.id,
     title: v.snippet?.title,
     description: v.snippet?.description || '',
-    thumbnailUrl: v.snippet?.thumbnails?.medium?.url,
+    thumbnailUrl: pickBestThumbnail(v.snippet?.thumbnails),
     publishedAt: v.snippet?.publishedAt,
     duration: v.contentDetails?.duration || '',
     views: parseInt(v.statistics?.viewCount, 10) || 0,

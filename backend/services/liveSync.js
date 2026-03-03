@@ -393,6 +393,7 @@ async function syncYouTube({ nicheKey, references }) {
             views: Number(video.views || 0),
             likes: Number(video.likes || 0),
             comments: Number(video.comments || 0),
+            videoId: video.videoId || null,
             thumbnailUrl: video.thumbnailUrl || null,
             duration: video.duration || '',
             isShort: (() => {

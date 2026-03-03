@@ -7,6 +7,7 @@ import {
   saveWorkspaceProfile,
   getDashboardSnapshot,
   getCommercialOffer,
+  upsertKolCandidate,
   getOrCreateTelegramAlertConnection,
   updateTelegramAlertConnection,
   connectTelegramChatByToken,
@@ -68,6 +69,40 @@ function parseJsonArray(raw) {
       return [];
     }
   }
+}
+
+function dateOnly(input = null) {
+  const d = input ? new Date(input) : new Date();
+  if (Number.isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
+  return d.toISOString().slice(0, 10);
+}
+
+function normalizePrimaryNetwork(platform) {
+  const raw = String(platform || '').trim().toLowerCase();
+  if (raw.includes('youtube')) return 'YouTube';
+  if (raw === 'x' || raw.includes('twitter')) return 'X';
+  if (raw.includes('instagram')) return 'Instagram';
+  if (raw.includes('twitch')) return 'Twitch';
+  if (raw.includes('meta') || raw.includes('facebook')) return 'Meta';
+  return 'X';
+}
+
+function ensureHandle(value, network) {
+  const clean = String(value || '').trim();
+  if (!clean) return network === 'YouTube' ? 'source-youtube' : '@source';
+  if (network === 'YouTube') return clean.replace(/^@/, '');
+  return clean.startsWith('@') ? clean : `@${clean}`;
+}
+
+function profileUrlFromItem(item, network, handle) {
+  if (item?.url) return item.url;
+  const clean = String(handle || '').replace(/^@/, '');
+  if (!clean) return null;
+  if (network === 'X') return `https://x.com/${clean}`;
+  if (network === 'YouTube') return `https://www.youtube.com/@${clean}`;
+  if (network === 'Instagram') return `https://www.instagram.com/${clean}`;
+  if (network === 'Twitch') return `https://www.twitch.tv/${clean}`;
+  return null;
 }
 
 router.get('/niches', (_req, res) => {
@@ -437,6 +472,101 @@ router.post('/kol/prompt-test', async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       error: error.message || 'Unable to run KOL prompt test.',
+    });
+  }
+});
+
+router.post('/kol/prompt-sync', async (req, res) => {
+  const {
+    nicheKey = 'intelligence-artificielle-fr',
+    surveyAnswers = {},
+    objective = 'awareness',
+    budget = 'mid',
+    countryCode = 'FR',
+    language = 'fr',
+    limit = 10,
+  } = req.body || {};
+
+  if (!llm.isConfigured('openai')) {
+    return res.status(400).json({
+      error: 'OpenAI is not configured. Add OPENAI_API_KEY in .env.',
+    });
+  }
+
+  try {
+    const promptPath = join(__dirname, '..', '..', 'Prompts', 'Prompt_Extract_KOLs_From_Survey.txt');
+    const systemPrompt = await readFile(promptPath, 'utf8');
+    const seeds = getStrictSeedsForNiche(nicheKey);
+
+    const userPrompt = [
+      'Lance extraction KOL sur ces donnees:',
+      `niche: ${nicheKey}`,
+      `country_code: ${countryCode}`,
+      `language: ${language}`,
+      `objective: ${objective}`,
+      `budget: ${budget}`,
+      `survey_answers_json: ${JSON.stringify(surveyAnswers || {})}`,
+      `x_seed_handles: ${JSON.stringify(seeds?.xUsers || [])}`,
+      `youtube_seed_channels: ${JSON.stringify(seeds?.youtubeChannels || [])}`,
+      `limit: ${Math.max(1, Math.min(15, Number(limit || 10)))}`,
+    ].join('\n');
+
+    const raw = await llm.generate(systemPrompt, userPrompt, {
+      provider: 'openai',
+      task: 'analysis',
+      temperature: 0.1,
+      maxTokens: 1800,
+    });
+
+    const parsed = parseJsonArray(raw);
+    const selected = parsed
+      .filter((item) => Number(item?.niche_fit_score || 0) >= 70)
+      .slice(0, 15);
+
+    let created = 0;
+    let updated = 0;
+
+    for (const item of selected) {
+      const network = normalizePrimaryNetwork(item?.platform);
+      const rawHandle = item?.handle || item?.username || item?.channel || item?.name || '';
+      const handle = ensureHandle(rawHandle, network);
+      const name = String(item?.name || rawHandle || handle || 'KOL').trim();
+
+      const write = upsertKolCandidate({
+        nicheKey,
+        name,
+        handle,
+        primaryNetwork: network,
+        secondaryNetworks: [],
+        followers: Number(item?.followers || 0),
+        engagementRate: Number(item?.engagement_score || 0),
+        fitScore: Number(item?.niche_fit_score || 0),
+        estSponsorshipUsd: Number(item?.est_sponsorship_usd || 0),
+        reason: String(item?.why_relevant || 'Prompt KOL extraction depuis sondage.'),
+        profileUrl: profileUrlFromItem(item, network, handle),
+        lastSignalAt: dateOnly(),
+      });
+
+      if (write.updated) updated += 1;
+      else created += 1;
+    }
+
+    return res.json({
+      ok: true,
+      nicheKey,
+      usedSeeds: {
+        xUsers: seeds?.xUsers?.length || 0,
+        youtubeChannels: seeds?.youtubeChannels?.length || 0,
+      },
+      count: selected.length,
+      created,
+      updated,
+      items: selected,
+      raw: raw?.slice(0, 2400) || '',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message || 'Unable to run and store KOL prompt output.',
     });
   }
 });
