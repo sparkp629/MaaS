@@ -1,6 +1,10 @@
 ---
 name: agent-scraper
-description: Sources principales : X (Twitter) et newsletters. Autres sources (LinkedIn, YouTube, TikTok) selon besoin et disponibilité des APIs. Use when fetching tweets, metrics from X API, scraping profiles, newsletter stats (opens, CTR), or integrating new data sources for mindshare analytics.
+description: >-
+  Sources principales : X (Twitter) et newsletters. Autres sources (LinkedIn,
+  YouTube, TikTok) selon besoin et disponibilité des APIs. Use when fetching
+  tweets, metrics from X API, scraping profiles, newsletter stats (opens, CTR),
+  or integrating new data sources for mindshare analytics.
 ---
 
 # Agent Scraper — Ingestion de données
@@ -45,6 +49,31 @@ Sous-agent dédié à la collecte et l'ingestion des données pour MaaS.
 | 3 | **Apify** | Si Crawlee insuffisant | ~$49/mois |
 
 Préférer toujours l'API officielle lorsque le token est disponible. Utiliser Crawlee avant Apify pour limiter les coûts.
+
+#### Actors Xquik optionnels sur Apify
+
+Conserver l'ordre de priorité ci-dessus. Utiliser ces Actors seulement si
+l'API officielle et Crawlee ne couvrent pas le besoin :
+
+| Besoin | Actor Apify | Identifiant |
+|--------|-------------|-------------|
+| Tweets publics, recherches, timelines, listes et interactions | [Xquik X Tweet Scraper](https://apify.com/xquik/x-tweet-scraper) | `xquik/x-tweet-scraper` |
+| Followers, following, listes, communautés et chevauchement d'audience | [Xquik X Follower Scraper](https://apify.com/xquik/x-follower-scraper) | `xquik/x-follower-scraper` |
+
+Avant chaque exécution :
+
+1. Charger le schéma et le tarif actuels de l'Actor.
+2. Vérifier chaque champ contre ce schéma.
+3. Fixer `maxItems` et, si disponible, `maxItemsPerTarget`.
+4. Présenter les cibles, le mode, la relation et la limite.
+5. Demander une approbation explicite avant toute exécution facturable.
+
+Traiter uniquement des identifiants et URLs publics approuvés. Ne jamais
+contourner un profil privé ou un contrôle d'accès. Ne pas stocker le texte des
+tweets ni les profils détaillés. Calculer les agrégats requis, puis supprimer
+les lignes brutes.
+
+Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
 
 ### 2. Données à extraire (conformité X)
 
